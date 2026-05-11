@@ -1,65 +1,96 @@
-import Image from "next/image";
+
+import StatsCard from "@/components/StatsCard";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-black text-white">
+      {/* NAVBAR */}
+      <nav className="flex items-center justify-between px-8 py-6 border-b border-white/10">
+        <h1 className="text-2xl font-bold tracking-widest text-emerald-400">
+          ASIRA
+        </h1>
+
+        <div className="flex gap-6 text-sm text-white/70">
+          <button>Home</button>
+          <button>Services</button>
+          <button>Partners</button>
+          <button>Contact</button>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="max-w-7xl mx-auto px-8 py-24 grid md:grid-cols-2 gap-16 items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm mb-6">
+            Global Digital Remittance
+          </div>
+
+          <h1 className="text-6xl font-black leading-tight">
+            ASIRA
+            <span className="block text-emerald-400">
+              GLOBAL REMIT
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-6 text-lg text-white/60 leading-8">
+            Fast international remittance platform with crypto-powered liquidity,
+            secure payouts, partner integrations, and real-time transaction
+            processing.
           </p>
+
+          <div className="flex gap-4 mt-10">
+            <button className="px-6 py-4 rounded-2xl bg-emerald-500 text-black font-bold hover:scale-105 transition">
+              Start Transfer
+            </button>
+
+            <button className="px-6 py-4 rounded-2xl border border-white/20 hover:bg-white/5 transition">
+              Admin Portal
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* RIGHT PANEL */}
+        <div className="rounded-3xl border border-emerald-500/20 bg-white/5 backdrop-blur-xl p-8 shadow-2xl shadow-emerald-500/10">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <p className="text-white/50 text-sm">
+                Available Liquidity
+              </p>
+
+              <h2 className="text-4xl font-bold mt-2">
+                $12.8M
+              </h2>
+            </div>
+
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center text-black font-black">
+              A
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <StatsCard
+              title="Today's Transfers"
+              value="1,248"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            <StatsCard
+              title="Active Partners"
+              value="82"
+            />
+
+            <StatsCard
+              title="Countries Supported"
+              value="34"
+            />
+
+            <StatsCard
+              title="Processing Volume"
+              value="$48.2M"
+            />
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
+
