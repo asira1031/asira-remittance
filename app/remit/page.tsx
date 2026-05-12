@@ -42,64 +42,65 @@ export default function RemitPage() {
   }
 
   async function handleSubmit() {
-    setLoading(true);
-    setMessage("");
+    try {
+      setLoading(true);
+      setMessage("");
 
-    const finalConvertedAmount = Number(amount || 0) * usdRate;
-
-    const { data, error } = await supabase
-      .from("transactions")
-      .insert([
-        {
-          sender_name: senderName,
-          receiver_name: receiverName,
-          amount: Number(amount),
-          converted_amount: finalConvertedAmount,
-          exchange_rate: usdRate,
-         destination_country: destinationCountry,
-payment_method: paymentMethod,
-status: "PENDING",
+      const response = await fetch("/api/remit/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ])
-      .select()
-      .single();
+        body: JSON.stringify({
+          senderName,
+          receiverName,
+          amount,
+        }),
+      });
 
-    if (error) {
-      setMessage(`❌ ${error.message}`);
-      console.log("Supabase insert error:", error);
+      const result = await response.json();
+
+      console.log(result);
+
+      const { data: paymentData, error: paymentError } = await supabase
+        .from("payment_intents")
+        .insert([
+          {
+            transaction_id: crypto.randomUUID(),
+            reference: `ASIRA-${Date.now()}`,
+            amount: Number(amount),
+            currency: "USD",
+          },
+        ])
+        .select()
+        .single();
+
+      if (paymentError) {
+        setMessage(`❌ ${paymentError.message}`);
+        console.log("Payment intent error:", paymentError);
+        return;
+      }
+
+      setSenderName("");
+      setReceiverName("");
+      setAmount("");
+      setConvertedAmount(0);
+      setDestinationCountry("");
+
+      if (paymentData) {
+        router.push(`/checkout/${paymentData.id}`);
+      }
+
+      if (result.success) {
+        setMessage("✅ Remittance Created Successfully");
+      } else {
+        setMessage("❌ Failed");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("❌ Server Error");
+    } finally {
       setLoading(false);
-      return;
-    }
-
-    const { data: paymentData, error: paymentError } = await supabase
-      .from("payment_intents")
-      .insert([
-        {
-          transaction_id: data.id,
-          reference: `ASIRA-${Date.now()}`,
-          amount: Number(amount),
-          currency: "USD",
-        },
-      ])
-      .select()
-      .single();
-
-    if (paymentError) {
-      setMessage(`❌ ${paymentError.message}`);
-      console.log("Payment intent error:", paymentError);
-      setLoading(false);
-      return;
-    }
-
-    setSenderName("");
-    setReceiverName("");
-    setAmount("");
-    setConvertedAmount(0);
-    setDestinationCountry("");
-    setLoading(false);
-
-    if (paymentData) {
-      router.push(`/checkout/${paymentData.id}`);
     }
   }
 
@@ -161,52 +162,54 @@ status: "PENDING",
         </label>
 
         <input
-  value={destinationCountry}
-  onChange={(e) => setDestinationCountry(e.target.value)}
-  className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-/>
+          value={destinationCountry}
+          onChange={(e) => setDestinationCountry(e.target.value)}
+          className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        />
 
-<label className="block text-sm text-white/50 mb-2">
-  Payment Method
-</label>
+        <label className="block text-sm text-white/50 mb-2">
+          Payment Method
+        </label>
 
-<select
-  value={paymentMethod}
-  onChange={(e) => setPaymentMethod(e.target.value)}
-  className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
->
-  <option value="BANK">Bank Transfer</option>
-  <option value="CARD">Card Payment</option>
-  <option value="SWIFT">SWIFT Transfer</option>
-</select>
+        <select
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        >
+          <option value="BANK">Bank Transfer</option>
+          <option value="CARD">Card Payment</option>
+          <option value="SWIFT">SWIFT Transfer</option>
+        </select>
 
-<div className="mb-6 rounded-2xl border border-white/10 bg-black/30 p-4">
-  {paymentMethod === "BANK" && (
-    <p className="text-emerald-400 text-sm">
-      Bank payout routing selected.
-    </p>
-  )}
+        <div className="mb-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+          {paymentMethod === "BANK" && (
+            <p className="text-emerald-400 text-sm">
+              Bank payout routing selected.
+            </p>
+          )}
 
-  {paymentMethod === "CARD" && (
-    <p className="text-blue-400 text-sm">
-      Card payment selected. Gateway integration ready for Visa / Mastercard settlement.
-    </p>
-  )}
+          {paymentMethod === "CARD" && (
+            <p className="text-blue-400 text-sm">
+              Card payment selected. Gateway integration ready for Visa /
+              Mastercard settlement.
+            </p>
+          )}
 
-  {paymentMethod === "SWIFT" && (
-    <p className="text-yellow-400 text-sm">
-      SWIFT international transfer selected.
-    </p>
-  )}
-</div>
+          {paymentMethod === "SWIFT" && (
+            <p className="text-yellow-400 text-sm">
+              SWIFT international transfer selected.
+            </p>
+          )}
+        </div>
 
-<button
-  onClick={handleSubmit}
-  disabled={loading}
-  className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
->
-  {loading ? "Processing..." : "Create Transfer"}
-</button>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
+        >
+          {loading ? "Processing..." : "Create Transfer"}
+        </button>
+
         {message && (
           <p className="mt-4 text-center text-white/70">
             {message}
