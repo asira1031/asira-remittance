@@ -1,96 +1,144 @@
+"use client";
 
-import StatsCard from "@/components/StatsCard";
-
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="min-h-screen bg-black text-white">
-      {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-white/10">
-        <h1 className="text-2xl font-bold tracking-widest text-emerald-400">
-          ASIRA
-        </h1>
+      {/* HEADER */}
+      <header className="border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
+          <h1 className="text-4xl font-black text-emerald-400">
+            ASIRA
+          </h1>
 
-        <div className="flex gap-6 text-sm text-white/70">
-          <button>Home</button>
-          <button>Services</button>
-          <button>Partners</button>
-          <button>Contact</button>
+          <div className="flex items-center gap-8 text-sm font-medium text-white">
+            <a href="/" className="hover:text-emerald-400 transition">
+              Home
+            </a>
+
+            <a
+              href="/client/dashboard"
+              className="hover:text-emerald-400 transition"
+            >
+              Services
+            </a>
+
+            <a
+              href="/admin/bank"
+              className="hover:text-emerald-400 transition"
+            >
+              Partners
+            </a>
+
+            <a
+              href="/client/transfers"
+              className="hover:text-emerald-400 transition"
+            >
+              Contact
+            </a>
+          </div>
         </div>
-      </nav>
+      </header>
 
       {/* HERO */}
-      <section className="max-w-7xl mx-auto px-8 py-24 grid md:grid-cols-2 gap-16 items-center">
+      <section className="max-w-7xl mx-auto px-8 py-24 grid lg:grid-cols-2 gap-20 items-center">
+        {/* LEFT */}
         <div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm mb-6">
+          <div className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-emerald-400 text-sm">
             Global Digital Remittance
           </div>
 
-          <h1 className="text-6xl font-black leading-tight">
+          <h1 className="mt-10 text-7xl font-black leading-tight">
             ASIRA
-            <span className="block text-emerald-400">
+            <br />
+            <span className="text-emerald-400">
               GLOBAL REMIT
             </span>
           </h1>
 
-          <p className="mt-6 text-lg text-white/60 leading-8">
-            Fast international remittance platform with crypto-powered liquidity,
-            secure payouts, partner integrations, and real-time transaction
-            processing.
+          <p className="mt-10 text-xl leading-10 text-white/70 max-w-2xl">
+            Fast international remittance platform with crypto-powered
+            liquidity, secure payouts, partner integrations, and
+            real-time transaction processing.
           </p>
 
           <div className="flex gap-4 mt-10">
-            <button className="px-6 py-4 rounded-2xl bg-emerald-500 text-black font-bold hover:scale-105 transition">
+            <a
+              href="/remit"
+              className="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-8 py-4 font-bold text-black hover:opacity-90 transition"
+            >
               Start Transfer
-            </button>
+            </a>
 
-            <button className="px-6 py-4 rounded-2xl border border-white/20 hover:bg-white/5 transition">
+            <a
+              href="/admin/dashboard"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/10 px-8 py-4 font-bold text-white hover:border-emerald-400 hover:text-emerald-400 transition"
+            >
               Admin Portal
-            </button>
+            </a>
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className="rounded-3xl border border-emerald-500/20 bg-white/5 backdrop-blur-xl p-8 shadow-2xl shadow-emerald-500/10">
-          <div className="flex justify-between items-center mb-8">
+        {/* RIGHT CARD */}
+        <div className="rounded-[40px] border border-emerald-500/20 bg-white/[0.03] p-8 shadow-2xl shadow-emerald-500/5">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-white/50 text-sm">
+              <p className="text-white/40 text-sm">
                 Available Liquidity
               </p>
 
-              <h2 className="text-4xl font-bold mt-2">
+              <h2 className="text-6xl font-black mt-2">
                 $12.8M
               </h2>
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center text-black font-black">
+            <div className="h-16 w-16 rounded-2xl bg-emerald-500 flex items-center justify-center text-black font-black text-2xl">
               A
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <StatsCard
-              title="Today's Transfers"
-              value="1,248"
-            />
+          <div className="mt-10 space-y-5">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-white/40 text-sm">
+                Today's Transfers
+              </p>
 
-            <StatsCard
-              title="Active Partners"
-              value="82"
-            />
+              <h3 className="text-5xl font-black text-emerald-400 mt-4">
+                1,248
+              </h3>
+            </div>
 
-            <StatsCard
-              title="Countries Supported"
-              value="34"
-            />
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-white/40 text-sm">
+                Active Partners
+              </p>
 
-            <StatsCard
-              title="Processing Volume"
-              value="$48.2M"
-            />
+              <h3 className="text-5xl font-black text-emerald-400 mt-4">
+                82
+              </h3>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-white/40 text-sm">
+                Countries Supported
+              </p>
+
+              <h3 className="text-5xl font-black text-emerald-400 mt-4">
+                34
+              </h3>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-white/40 text-sm">
+                Processing Volume
+              </p>
+
+              <h3 className="text-5xl font-black text-emerald-400 mt-4">
+                $48.2M
+              </h3>
+            </div>
           </div>
         </div>
       </section>
     </main>
   );
 }
-
