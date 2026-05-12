@@ -13,6 +13,7 @@ export default function RemitPage() {
   const [convertedAmount, setConvertedAmount] = useState(0);
   const [usdRate, setUsdRate] = useState(56);
   const [destinationCountry, setDestinationCountry] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("BANK");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -55,7 +56,9 @@ export default function RemitPage() {
           amount: Number(amount),
           converted_amount: finalConvertedAmount,
           exchange_rate: usdRate,
-          destination_country: destinationCountry,
+         destination_country: destinationCountry,
+payment_method: paymentMethod,
+status: "PENDING",
         },
       ])
       .select()
@@ -158,19 +161,52 @@ export default function RemitPage() {
         </label>
 
         <input
-          value={destinationCountry}
-          onChange={(e) => setDestinationCountry(e.target.value)}
-          className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        />
+  value={destinationCountry}
+  onChange={(e) => setDestinationCountry(e.target.value)}
+  className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+/>
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
-        >
-          {loading ? "Processing..." : "Create Transfer"}
-        </button>
+<label className="block text-sm text-white/50 mb-2">
+  Payment Method
+</label>
 
+<select
+  value={paymentMethod}
+  onChange={(e) => setPaymentMethod(e.target.value)}
+  className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+>
+  <option value="BANK">Bank Transfer</option>
+  <option value="CARD">Card Payment</option>
+  <option value="SWIFT">SWIFT Transfer</option>
+</select>
+
+<div className="mb-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+  {paymentMethod === "BANK" && (
+    <p className="text-emerald-400 text-sm">
+      Bank payout routing selected.
+    </p>
+  )}
+
+  {paymentMethod === "CARD" && (
+    <p className="text-blue-400 text-sm">
+      Card payment selected. Gateway integration ready for Visa / Mastercard settlement.
+    </p>
+  )}
+
+  {paymentMethod === "SWIFT" && (
+    <p className="text-yellow-400 text-sm">
+      SWIFT international transfer selected.
+    </p>
+  )}
+</div>
+
+<button
+  onClick={handleSubmit}
+  disabled={loading}
+  className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
+>
+  {loading ? "Processing..." : "Create Transfer"}
+</button>
         {message && (
           <p className="mt-4 text-center text-white/70">
             {message}
