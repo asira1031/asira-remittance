@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type PaymentIntent = {
-  id: number;
-  transaction_id: number;
+  id: number | null;
+  transaction_id: number | null;
   reference: string;
   amount: number;
   currency: string;
@@ -29,22 +29,41 @@ export default function CheckoutPage() {
   const [method, setMethod] = useState<Method>("card");
 
   async function loadPayment() {
-    const { data: paymentData, error: paymentError } = await supabase
-      .from("payment_intents")
-      .select("*")
-      .eq("id", Number(id))
-      .single();
+    setErrorMessage("");
 
-    if (paymentError) {
-      setErrorMessage(paymentError.message);
+    const isNumericId = /^\d+$/.test(id);
+
+    const query = supabase
+      .from("payment_intents")
+      .select("*");
+
+    const { data: paymentData, error: paymentError } = isNumericId
+      ? await query.eq("id", Number(id)).maybeSingle()
+      : await query.eq("reference", id).maybeSingle();
+
+    if (!paymentData || paymentError) {
+      setPayment({
+        id: null,
+        transaction_id: null,
+        reference: id,
+        amount: 0,
+        currency: "USD",
+        status: "PENDING",
+      });
       return;
     }
 
-    const { data: transactionData } = await supabase
-      .from("transactions")
-      .select("amount, payment_method")
-      .eq("id", paymentData.transaction_id)
-      .single();
+    let transactionData = null;
+
+    if (paymentData.transaction_id) {
+      const { data } = await supabase
+        .from("transactions")
+        .select("amount, payment_method")
+        .eq("id", paymentData.transaction_id)
+        .maybeSingle();
+
+      transactionData = data;
+    }
 
     setPayment({
       ...paymentData,
@@ -52,9 +71,11 @@ export default function CheckoutPage() {
     });
 
     const rail = transactionData?.payment_method;
+
     if (rail === "BANK") setMethod("bank");
     if (rail === "CARD") setMethod("card");
     if (rail === "SWIFT") setMethod("swift");
+    if (rail === "CRYPTO") setMethod("crypto");
   }
 
   async function proceedPayment() {
@@ -71,21 +92,31 @@ export default function CheckoutPage() {
         ? "AWAITING_SWIFT_TRANSFER"
         : "AWAITING_CRYPTO_PAYMENT";
 
-    await supabase
-      .from("payment_intents")
-      .update({ status: nextStatus })
-      .eq("id", payment.id);
+    if (payment.id) {
+      await supabase
+        .from("payment_intents")
+        .update({ status: nextStatus })
+        .eq("id", payment.id);
+    }
 
-    await supabase
-      .from("transactions")
-      .update({
-        status: method === "card" ? "APPROVED" : "PROCESSING",
-        payment_method: method.toUpperCase(),
-      })
-      .eq("id", payment.transaction_id);
+    if (payment.transaction_id) {
+      await supabase
+        .from("transactions")
+        .update({
+          status: method === "card" ? "APPROVED" : "PROCESSING",
+          payment_method: method.toUpperCase(),
+        })
+        .eq("id", payment.transaction_id);
+    }
 
-    await loadPayment();
+    setPayment({
+      ...payment,
+      status: nextStatus,
+    });
+
     setLoading(false);
+
+    alert("Payment submitted for review.");
   }
 
   useEffect(() => {
@@ -127,7 +158,7 @@ export default function CheckoutPage() {
         <div className="mt-10 space-y-5">
           <div className="rounded-2xl bg-black/40 p-5 border border-white/10">
             <p className="text-white/50 text-sm">Payment Reference</p>
-            <h2 className="text-xl font-bold text-emerald-400 mt-2">
+            <h2 className="text-xl font-bold text-emerald-400 mt-2 break-all">
               {payment.reference}
             </h2>
           </div>
@@ -167,26 +198,12 @@ export default function CheckoutPage() {
           <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 space-y-4">
             <p className="text-white/50 text-sm">Card Payment Details</p>
 
-            <input
-              placeholder="Cardholder Name"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              placeholder="Card Number"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
+            <input placeholder="Cardholder Name" className="input" />
+            <input placeholder="Card Number" className="input" />
 
             <div className="grid grid-cols-2 gap-4">
-              <input
-                placeholder="Expiry"
-                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-              />
-
-              <input
-                placeholder="CVV"
-                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-              />
+              <input placeholder="Expiry" className="input" />
+              <input placeholder="CVV" className="input" />
             </div>
           </div>
         )}
@@ -195,31 +212,12 @@ export default function CheckoutPage() {
           <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 space-y-4">
             <p className="text-white/50 text-sm">Bank Transfer Details</p>
 
-            <input
-              placeholder="Account Holder Name"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
+            <input placeholder="Account Holder Name" className="input" />
+            <input placeholder="Bank Name" className="input" />
+            <input placeholder="Account Number" className="input" />
+            <input placeholder="Routing Number / IBAN" className="input" />
 
-            <input
-              placeholder="Bank Name"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              placeholder="Account Number"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              placeholder="Routing Number / IBAN"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              value={payment.reference}
-              readOnly
-              className="w-full rounded-xl bg-black/40 border border-emerald-500/30 px-4 py-3 outline-none text-emerald-400 font-bold"
-            />
+            <input value={payment.reference} readOnly className="input text-emerald-400 font-bold" />
           </div>
         )}
 
@@ -227,31 +225,12 @@ export default function CheckoutPage() {
           <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 space-y-4">
             <p className="text-white/50 text-sm">SWIFT Transfer Details</p>
 
-            <input
-              placeholder="Beneficiary Name"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
+            <input placeholder="Beneficiary Name" className="input" />
+            <input placeholder="Bank Name" className="input" />
+            <input placeholder="SWIFT / BIC Code" className="input" />
+            <input placeholder="IBAN / Account Number" className="input" />
 
-            <input
-              placeholder="Bank Name"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              placeholder="SWIFT / BIC Code"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              placeholder="IBAN / Account Number"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
-
-            <input
-              value={payment.reference}
-              readOnly
-              className="w-full rounded-xl bg-black/40 border border-emerald-500/30 px-4 py-3 outline-none text-emerald-400 font-bold"
-            />
+            <input value={payment.reference} readOnly className="input text-emerald-400 font-bold" />
           </div>
         )}
 
@@ -259,36 +238,29 @@ export default function CheckoutPage() {
           <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 space-y-4">
             <p className="text-white/50 text-sm">Crypto Payment Details</p>
 
-            <select className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none">
+            <select className="input">
               <option>USDT</option>
               <option>BTC</option>
               <option>ETH</option>
               <option>USDC</option>
             </select>
 
-            <select className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none">
+            <select className="input">
               <option>ERC20</option>
               <option>TRC20</option>
               <option>BEP20</option>
               <option>Polygon</option>
             </select>
 
-            <input
-              placeholder="Sender Wallet Address"
-              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-            />
+            <input placeholder="Sender Wallet Address" className="input" />
 
             <input
               value="0xc47133a6bd653793562a1ea25cb1d3161fbd99cd"
               readOnly
-              className="w-full rounded-xl bg-black/40 border border-emerald-500/30 px-4 py-3 outline-none text-emerald-400 font-bold"
+              className="input text-emerald-400 font-bold"
             />
 
-            <input
-              value={payment.reference}
-              readOnly
-              className="w-full rounded-xl bg-black/40 border border-emerald-500/30 px-4 py-3 outline-none text-emerald-400 font-bold"
-            />
+            <input value={payment.reference} readOnly className="input text-emerald-400 font-bold" />
           </div>
         )}
 
