@@ -24,27 +24,39 @@ type PaymentLink = {
   payout_rail: string;
   swift_code: string;
   iban: string;
+
+  allow_bank: boolean;
+  allow_card: boolean;
+  allow_swift: boolean;
+  allow_crypto: boolean;
 };
 
-export default function ClientPaymentsPage() {
+export default function MerchantGatewayPage() {
   const [links, setLinks] = useState<PaymentLink[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [merchantName, setMerchantName] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("PHP");
+  const [currency, setCurrency] = useState("USD");
   const [description, setDescription] = useState("");
 
   const [receiverBankName, setReceiverBankName] = useState("");
   const [receiverAccountName, setReceiverAccountName] = useState("");
   const [receiverAccountNumber, setReceiverAccountNumber] = useState("");
   const [receiverCountry, setReceiverCountry] = useState("");
-  const [receiverCurrency, setReceiverCurrency] = useState("PHP");
+  const [receiverCurrency, setReceiverCurrency] = useState("USD");
+
   const [payoutRail, setPayoutRail] = useState("BANK");
   const [swiftCode, setSwiftCode] = useState("");
   const [iban, setIban] = useState("");
+
+  const [allowBank, setAllowBank] = useState(true);
+  const [allowCard, setAllowCard] = useState(true);
+  const [allowSwift, setAllowSwift] = useState(true);
+  const [allowCrypto, setAllowCrypto] = useState(false);
 
   async function loadLinks() {
     setLoading(true);
@@ -62,7 +74,7 @@ export default function ClientPaymentsPage() {
   }
 
   async function createPaymentLink() {
-    const reference = `ASIRA-PAY-${Date.now()}`;
+    const reference = `ASIRA-${Date.now()}`;
     const paymentUrl = `${window.location.origin}/pay/${reference}`;
 
     const { error } = await supabase
@@ -76,7 +88,7 @@ export default function ClientPaymentsPage() {
           amount: Number(amount || 0),
           currency,
           description,
-          status: "ACTIVE",
+          status: "PENDING",
           payment_url: paymentUrl,
 
           receiver_bank_name: receiverBankName,
@@ -87,6 +99,11 @@ export default function ClientPaymentsPage() {
           payout_rail: payoutRail,
           swift_code: swiftCode,
           iban,
+
+          allow_bank: allowBank,
+          allow_card: allowCard,
+          allow_swift: allowSwift,
+          allow_crypto: allowCrypto,
         },
       ]);
 
@@ -95,37 +112,21 @@ export default function ClientPaymentsPage() {
       return;
     }
 
+    alert("Payment link created successfully.");
+
     setMerchantName("");
     setCustomerName("");
     setCustomerEmail("");
     setAmount("");
-    setCurrency("PHP");
+    setCurrency("USD");
     setDescription("");
-
-    setReceiverBankName("");
-    setReceiverAccountName("");
-    setReceiverAccountNumber("");
-    setReceiverCountry("");
-    setReceiverCurrency("PHP");
-    setPayoutRail("BANK");
-    setSwiftCode("");
-    setIban("");
-
-    await loadLinks();
-  }
-
-  async function cancelLink(id: number) {
-    await supabase
-      .from("merchant_payment_links")
-      .update({ status: "CANCELLED" })
-      .eq("id", id);
 
     await loadLinks();
   }
 
   async function copyLink(url: string) {
     await navigator.clipboard.writeText(url);
-    alert("Payment link copied!");
+    alert("Payment link copied.");
   }
 
   useEffect(() => {
@@ -133,177 +134,213 @@ export default function ClientPaymentsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white px-8 py-10">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-black text-emerald-400">
+    <main className="min-h-screen bg-black text-white px-6 py-10">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="text-5xl font-black text-emerald-400">
           Merchant Gateway
         </h1>
 
-        <p className="text-white/50 mt-2">
-          Create hosted payment links and define settlement destinations.
+        <p className="mt-2 text-white/50">
+          Create hosted checkout links with multi-rail settlement routing.
         </p>
 
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-2xl font-black mb-5">
-            Create Payment Link
+        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
+          <h2 className="text-3xl font-black">
+            Create Merchant Payment Link
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-8">
+            <label className="text-sm text-white/50">
+              Payment Type
+            </label>
+
+            <select
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none"
+            >
+              <option>Merchant Payment</option>
+              <option>International Settlement</option>
+              <option>Invoice Collection</option>
+              <option>Gateway Checkout</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
             <Input label="Merchant Name" value={merchantName} setValue={setMerchantName} />
             <Input label="Customer Name" value={customerName} setValue={setCustomerName} />
             <Input label="Customer Email" value={customerEmail} setValue={setCustomerEmail} />
             <Input label="Amount" value={amount} setValue={setAmount} />
-            <Input label="Description" value={description} setValue={setDescription} />
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
             <div>
-              <label className="mb-2 block text-sm text-white/50">
+              <label className="text-sm text-white/50">
                 Currency
               </label>
 
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none"
               >
-                <option>PHP</option>
                 <option>USD</option>
+                <option>PHP</option>
                 <option>EUR</option>
                 <option>GBP</option>
                 <option>SGD</option>
               </select>
             </div>
+
+            <Input label="Description" value={description} setValue={setDescription} />
           </div>
 
-          <h2 className="text-2xl font-black mt-10 mb-5">
-            Settlement Destination
-          </h2>
+          <div className="mt-10 rounded-3xl border border-white/10 bg-black/30 p-6">
+            <h2 className="text-2xl font-black text-emerald-400">
+              Settlement Destination
+            </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input
-              label="Receiver Bank Name"
-              value={receiverBankName}
-              setValue={setReceiverBankName}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+              <Input
+                label="Receiver Bank Name"
+                value={receiverBankName}
+                setValue={setReceiverBankName}
+              />
 
-            <Input
-              label="Receiver Account Name"
-              value={receiverAccountName}
-              setValue={setReceiverAccountName}
-            />
+              <Input
+                label="Receiver Account Name"
+                value={receiverAccountName}
+                setValue={setReceiverAccountName}
+              />
 
-            <Input
-              label="Receiver Account Number"
-              value={receiverAccountNumber}
-              setValue={setReceiverAccountNumber}
-            />
+              <Input
+                label="Receiver Account Number"
+                value={receiverAccountNumber}
+                setValue={setReceiverAccountNumber}
+              />
 
-            <Input
-              label="Receiver Country"
-              value={receiverCountry}
-              setValue={setReceiverCountry}
-            />
-
-            <Input
-              label="Receiver Currency"
-              value={receiverCurrency}
-              setValue={setReceiverCurrency}
-            />
-
-            <div>
-              <label className="mb-2 block text-sm text-white/50">
-                Payout Rail
-              </label>
-
-              <select
-                value={payoutRail}
-                onChange={(e) => setPayoutRail(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
-              >
-                <option value="BANK">BANK</option>
-                <option value="CARD">CARD</option>
-                <option value="SWIFT">SWIFT</option>
-              </select>
+              <Input
+                label="Receiver Country"
+                value={receiverCountry}
+                setValue={setReceiverCountry}
+              />
             </div>
 
-            <Input
-              label="SWIFT Code"
-              value={swiftCode}
-              setValue={setSwiftCode}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+              <Input
+                label="Receiver Currency"
+                value={receiverCurrency}
+                setValue={setReceiverCurrency}
+              />
 
-            <Input
-              label="IBAN"
-              value={iban}
-              setValue={setIban}
-            />
+              <div>
+                <label className="text-sm text-white/50">
+                  Payout Rail
+                </label>
+
+                <select
+                  value={payoutRail}
+                  onChange={(e) => setPayoutRail(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none"
+                >
+                  <option value="BANK">BANK</option>
+                  <option value="SWIFT">SWIFT</option>
+                  <option value="CARD">CARD</option>
+                  <option value="CRYPTO">CRYPTO</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+              <Input
+                label="SWIFT Code"
+                value={swiftCode}
+                setValue={setSwiftCode}
+              />
+
+              <Input
+                label="IBAN"
+                value={iban}
+                setValue={setIban}
+              />
+            </div>
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-white/10 bg-black/30 p-6">
+            <h2 className="text-2xl font-black text-emerald-400">
+              Allowed Payment Methods
+            </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <Toggle
+                label="Bank"
+                enabled={allowBank}
+                setEnabled={setAllowBank}
+              />
+
+              <Toggle
+                label="Card"
+                enabled={allowCard}
+                setEnabled={setAllowCard}
+              />
+
+              <Toggle
+                label="SWIFT"
+                enabled={allowSwift}
+                setEnabled={setAllowSwift}
+              />
+
+              <Toggle
+                label="Crypto"
+                enabled={allowCrypto}
+                setEnabled={setAllowCrypto}
+              />
+            </div>
           </div>
 
           <button
             onClick={createPaymentLink}
-            className="w-full mt-8 rounded-2xl bg-emerald-500 py-4 font-black text-black"
+            className="mt-10 w-full rounded-3xl bg-emerald-500 py-5 text-xl font-black text-black"
           >
-            Create Payment Link
+            Create Hosted Payment Link
           </button>
         </div>
 
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-2xl font-black mb-5">
-            Created Payment Links
+        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
+          <h2 className="text-3xl font-black">
+            Generated Payment Links
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-5 mt-8">
             {loading && (
               <div className="rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-white/40">
                 Loading payment links...
               </div>
             )}
 
-            {!loading && links.length === 0 && (
-              <div className="rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-white/40">
-                No payment links created yet.
-              </div>
-            )}
+            {!loading &&
+              links.map((link) => (
+                <div
+                  key={link.id}
+                  className="rounded-3xl border border-white/10 bg-black/40 p-6"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Info label="Reference" value={link.reference} />
+                    <Info label="Merchant" value={link.merchant_name} />
+                    <Info label="Amount" value={`${link.currency} ${link.amount}`} />
+                    <Info label="Status" value={link.status} />
+                  </div>
 
-            {links.map((link) => (
-              <div
-                key={link.id}
-                className="rounded-2xl border border-white/10 bg-black/40 p-5"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Info label="Reference" value={link.reference} />
-                  <Info label="Merchant" value={link.merchant_name} />
-                  <Info label="Customer" value={link.customer_name} />
-                  <Info
-                    label="Amount"
-                    value={`${link.currency} ${Number(link.amount).toLocaleString()}`}
-                  />
-                  <Info label="Receiver Bank" value={link.receiver_bank_name} />
-                  <Info label="Payout Rail" value={link.payout_rail} />
-                  <Info label="Status" value={link.status} />
-                  <Info label="SWIFT" value={link.swift_code} />
-                </div>
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-black/50 p-4 text-sm break-all text-white/60">
+                    {link.payment_url}
+                  </div>
 
-                <div className="mt-5 rounded-xl border border-white/10 bg-black/50 p-4 text-sm text-white/60 break-all">
-                  {link.payment_url}
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-2">
                   <button
                     onClick={() => copyLink(link.payment_url)}
-                    className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-black"
+                    className="mt-5 rounded-2xl bg-emerald-500 px-5 py-3 font-black text-black"
                   >
-                    Copy Link
-                  </button>
-
-                  <button
-                    onClick={() => cancelLink(link.id)}
-                    className="rounded-xl bg-red-500 px-4 py-2 text-xs font-black text-white"
-                  >
-                    Cancel
+                    Copy Payment Link
                   </button>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
@@ -322,24 +359,58 @@ function Input({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm text-white/50">
+      <label className="text-sm text-white/50">
         {label}
       </label>
 
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none"
       />
     </div>
   );
 }
 
-function Info({ label, value }: { label: string; value: any }) {
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value: any;
+}) {
   return (
-    <div>
-      <p className="text-xs text-white/40">{label}</p>
-      <p className="font-bold break-words">{value || "N/A"}</p>
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+      <p className="text-xs text-white/40">
+        {label}
+      </p>
+
+      <p className="mt-1 break-words font-bold">
+        {value || "N/A"}
+      </p>
     </div>
+  );
+}
+
+function Toggle({
+  label,
+  enabled,
+  setEnabled,
+}: {
+  label: string;
+  enabled: boolean;
+  setEnabled: (value: boolean) => void;
+}) {
+  return (
+    <button
+      onClick={() => setEnabled(!enabled)}
+      className={`rounded-2xl border p-5 font-black transition ${
+        enabled
+          ? "border-emerald-400 bg-emerald-500/10 text-emerald-400"
+          : "border-white/10 bg-black/40 text-white/40"
+      }`}
+    >
+      {label}
+    </button>
   );
 }

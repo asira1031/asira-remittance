@@ -25,6 +25,11 @@ type PaymentLink = {
   payout_rail: string;
   swift_code: string;
   iban: string;
+
+  allow_bank: boolean;
+  allow_card: boolean;
+  allow_swift: boolean;
+  allow_crypto: boolean;
 };
 
 export default function HostedPaymentPage() {
@@ -51,7 +56,7 @@ export default function HostedPaymentPage() {
     setLoading(false);
   }
 
-  async function markAsPaid() {
+  async function markAsPaid(method: string) {
     if (!payment) return;
 
     setPaying(true);
@@ -59,7 +64,10 @@ export default function HostedPaymentPage() {
 
     const { error } = await supabase
       .from("merchant_payment_links")
-      .update({ status: "PAID" })
+      .update({
+        status: "PAID",
+        payout_rail: method,
+      })
       .eq("id", payment.id);
 
     if (error) {
@@ -71,6 +79,7 @@ export default function HostedPaymentPage() {
     setPayment({
       ...payment,
       status: "PAID",
+      payout_rail: method,
     });
 
     setMessage("✅ Payment marked as paid successfully.");
@@ -98,6 +107,7 @@ export default function HostedPaymentPage() {
           <h1 className="text-3xl font-black text-red-400">
             Payment Link Not Found
           </h1>
+
           <p className="text-white/50 mt-3">
             This payment link does not exist or may have been removed.
           </p>
@@ -111,14 +121,14 @@ export default function HostedPaymentPage() {
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-8">
-      <div className="w-full max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8">
+      <div className="w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-8">
         <div className="border-b border-white/10 pb-6">
           <h1 className="text-4xl font-black text-emerald-400">
             ASIRA CHECKOUT
           </h1>
 
           <p className="text-white/50 mt-2">
-            Secure hosted payment page
+            Secure multi-rail payment processing
           </p>
         </div>
 
@@ -141,15 +151,17 @@ export default function HostedPaymentPage() {
         </div>
 
         {isCancelled && (
-          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-red-400 font-bold">
-            This payment link has been cancelled.
-          </div>
+          <Alert
+            tone="red"
+            text="This payment link has been cancelled."
+          />
         )}
 
         {isPaid && (
-          <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-emerald-400 font-bold">
-            Payment already completed.
-          </div>
+          <Alert
+            tone="emerald"
+            text="Payment already completed."
+          />
         )}
 
         {!isPaid && !isCancelled && (
@@ -158,60 +170,52 @@ export default function HostedPaymentPage() {
               Select Payment Method
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => setSelectedMethod("BANK")}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  selectedMethod === "BANK"
-                    ? "border-emerald-400 bg-emerald-500/10"
-                    : "border-white/10 bg-black/40"
-                }`}
-              >
-                <h3 className="text-xl font-black text-emerald-400">
-                  Bank Transfer
-                </h3>
-                <p className="text-white/50 text-sm mt-2">
-                  Local bank transfer via InstaPay or PESONet.
-                </p>
-              </button>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {payment.allow_bank !== false && (
+                <MethodButton
+                  title="Bank"
+                  desc="Local bank transfer"
+                  color="emerald"
+                  active={selectedMethod === "BANK"}
+                  onClick={() => setSelectedMethod("BANK")}
+                />
+              )}
 
-              <button
-                onClick={() => setSelectedMethod("CARD")}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  selectedMethod === "CARD"
-                    ? "border-blue-400 bg-blue-500/10"
-                    : "border-white/10 bg-black/40"
-                }`}
-              >
-                <h3 className="text-xl font-black text-blue-400">
-                  Card Payment
-                </h3>
-                <p className="text-white/50 text-sm mt-2">
-                  Visa / Mastercard secure checkout.
-                </p>
-              </button>
+              {payment.allow_card !== false && (
+                <MethodButton
+                  title="Card"
+                  desc="Visa / Mastercard"
+                  color="blue"
+                  active={selectedMethod === "CARD"}
+                  onClick={() => setSelectedMethod("CARD")}
+                />
+              )}
 
-              <button
-                onClick={() => setSelectedMethod("SWIFT")}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  selectedMethod === "SWIFT"
-                    ? "border-yellow-300 bg-yellow-500/10"
-                    : "border-white/10 bg-black/40"
-                }`}
-              >
-                <h3 className="text-xl font-black text-yellow-300">
-                  SWIFT / International
-                </h3>
-                <p className="text-white/50 text-sm mt-2">
-                  International wire transfer.
-                </p>
-              </button>
+              {payment.allow_swift !== false && (
+                <MethodButton
+                  title="SWIFT"
+                  desc="International wire"
+                  color="yellow"
+                  active={selectedMethod === "SWIFT"}
+                  onClick={() => setSelectedMethod("SWIFT")}
+                />
+              )}
+
+              {payment.allow_crypto === true && (
+                <MethodButton
+                  title="Crypto"
+                  desc="USDT settlement"
+                  color="purple"
+                  active={selectedMethod === "CRYPTO"}
+                  onClick={() => setSelectedMethod("CRYPTO")}
+                />
+              )}
             </div>
 
             {selectedMethod === "BANK" && (
               <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6">
                 <h3 className="text-2xl font-black text-emerald-400">
-                  Bank Transfer Instructions
+                  Bank Transfer Details
                 </h3>
 
                 <p className="text-white/50 text-sm mt-2">
@@ -224,7 +228,6 @@ export default function HostedPaymentPage() {
                   <Info label="Account Number" value={payment.receiver_account_number} />
                   <Info label="Country" value={payment.receiver_country} />
                   <Info label="Currency" value={payment.receiver_currency} />
-                  <Info label="Payout Rail" value={payment.payout_rail} />
                   <Info label="Payment Reference" value={payment.reference} />
                 </div>
 
@@ -234,7 +237,7 @@ export default function HostedPaymentPage() {
                 />
 
                 <button
-                  onClick={markAsPaid}
+                  onClick={() => markAsPaid("BANK")}
                   disabled={paying}
                   className="w-full mt-6 rounded-2xl bg-emerald-500 py-4 font-black text-black disabled:opacity-50"
                 >
@@ -246,7 +249,7 @@ export default function HostedPaymentPage() {
             {selectedMethod === "CARD" && (
               <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-6">
                 <h3 className="text-2xl font-black text-blue-400">
-                  Card Checkout
+                  Card Payment Details
                 </h3>
 
                 <p className="text-white/50 text-sm mt-2">
@@ -277,7 +280,7 @@ export default function HostedPaymentPage() {
                 </div>
 
                 <button
-                  onClick={markAsPaid}
+                  onClick={() => markAsPaid("CARD")}
                   disabled={paying}
                   className="w-full mt-6 rounded-2xl bg-blue-500 py-4 font-black text-white disabled:opacity-50"
                 >
@@ -289,7 +292,7 @@ export default function HostedPaymentPage() {
             {selectedMethod === "SWIFT" && (
               <div className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-6">
                 <h3 className="text-2xl font-black text-yellow-300">
-                  SWIFT / International Wire
+                  SWIFT / International Wire Details
                 </h3>
 
                 <p className="text-white/50 text-sm mt-2">
@@ -305,7 +308,6 @@ export default function HostedPaymentPage() {
                   <Info label="Country" value={payment.receiver_country} />
                   <Info label="Currency" value={payment.receiver_currency} />
                   <Info label="Payment Reference" value={payment.reference} />
-                  <Info label="Transfer Type" value="International Wire Transfer" />
                 </div>
 
                 <input
@@ -314,11 +316,41 @@ export default function HostedPaymentPage() {
                 />
 
                 <button
-                  onClick={markAsPaid}
+                  onClick={() => markAsPaid("SWIFT")}
                   disabled={paying}
                   className="w-full mt-6 rounded-2xl bg-yellow-400 py-4 font-black text-black disabled:opacity-50"
                 >
                   {paying ? "Processing..." : "Confirm SWIFT Transfer"}
+                </button>
+              </div>
+            )}
+
+            {selectedMethod === "CRYPTO" && (
+              <div className="rounded-3xl border border-purple-500/20 bg-purple-500/10 p-6">
+                <h3 className="text-2xl font-black text-purple-300">
+                  Crypto Payment Details
+                </h3>
+
+                <p className="text-white/50 text-sm mt-2">
+                  USDT settlement placeholder for future crypto rail.
+                </p>
+
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Info label="Network" value="USDT ERC20 / TRC20" />
+                  <Info label="Payment Reference" value={payment.reference} />
+                </div>
+
+                <input
+                  placeholder="Enter blockchain transaction hash"
+                  className="w-full mt-5 rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                />
+
+                <button
+                  onClick={() => markAsPaid("CRYPTO")}
+                  disabled={paying}
+                  className="w-full mt-6 rounded-2xl bg-purple-500 py-4 font-black text-white disabled:opacity-50"
+                >
+                  {paying ? "Processing..." : "Confirm Crypto Payment"}
                 </button>
               </div>
             )}
@@ -345,5 +377,60 @@ function Info({ label, value }: { label: string; value: any }) {
       <p className="text-xs text-white/40">{label}</p>
       <p className="font-bold mt-1 break-words">{value || "N/A"}</p>
     </div>
+  );
+}
+
+function Alert({ text, tone }: { text: string; tone: "red" | "emerald" }) {
+  const classes =
+    tone === "red"
+      ? "border-red-500/20 bg-red-500/10 text-red-400"
+      : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+
+  return (
+    <div className={`mt-6 rounded-2xl border p-5 font-bold ${classes}`}>
+      {text}
+    </div>
+  );
+}
+
+function MethodButton({
+  title,
+  desc,
+  color,
+  active,
+  onClick,
+}: {
+  title: string;
+  desc: string;
+  color: "emerald" | "blue" | "yellow" | "purple";
+  active: boolean;
+  onClick: () => void;
+}) {
+  const activeClasses = {
+    emerald: "border-emerald-400 bg-emerald-500/10 text-emerald-400",
+    blue: "border-blue-400 bg-blue-500/10 text-blue-400",
+    yellow: "border-yellow-300 bg-yellow-500/10 text-yellow-300",
+    purple: "border-purple-300 bg-purple-500/10 text-purple-300",
+  };
+
+  const textClasses = {
+    emerald: "text-emerald-400",
+    blue: "text-blue-400",
+    yellow: "text-yellow-300",
+    purple: "text-purple-300",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-2xl border p-5 text-left transition ${
+        active ? activeClasses[color] : "border-white/10 bg-black/40"
+      }`}
+    >
+      <h3 className={`text-xl font-black ${textClasses[color]}`}>
+        {title}
+      </h3>
+      <p className="text-white/50 text-sm mt-2">{desc}</p>
+    </button>
   );
 }
