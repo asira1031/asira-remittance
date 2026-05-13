@@ -16,6 +16,15 @@ type PaymentLink = {
   status: string;
   payment_url: string;
   created_at: string;
+
+  receiver_bank_name: string;
+  receiver_account_name: string;
+  receiver_account_number: string;
+  receiver_country: string;
+  receiver_currency: string;
+  payout_rail: string;
+  swift_code: string;
+  iban: string;
 };
 
 export default function HostedPaymentPage() {
@@ -114,9 +123,7 @@ export default function HostedPaymentPage() {
         </div>
 
         <div className="mt-8 rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6">
-          <p className="text-white/50 text-sm">
-            Amount Due
-          </p>
+          <p className="text-white/50 text-sm">Amount Due</p>
 
           <h2 className="text-5xl font-black text-emerald-400 mt-2">
             {payment.currency}{" "}
@@ -163,9 +170,8 @@ export default function HostedPaymentPage() {
                 <h3 className="text-xl font-black text-emerald-400">
                   Bank Transfer
                 </h3>
-
                 <p className="text-white/50 text-sm mt-2">
-                  Local Philippine bank transfer via InstaPay or PESONet.
+                  Local bank transfer via InstaPay or PESONet.
                 </p>
               </button>
 
@@ -180,7 +186,6 @@ export default function HostedPaymentPage() {
                 <h3 className="text-xl font-black text-blue-400">
                   Card Payment
                 </h3>
-
                 <p className="text-white/50 text-sm mt-2">
                   Visa / Mastercard secure checkout.
                 </p>
@@ -197,7 +202,6 @@ export default function HostedPaymentPage() {
                 <h3 className="text-xl font-black text-yellow-300">
                   SWIFT / International
                 </h3>
-
                 <p className="text-white/50 text-sm mt-2">
                   International wire transfer.
                 </p>
@@ -211,14 +215,17 @@ export default function HostedPaymentPage() {
                 </h3>
 
                 <p className="text-white/50 text-sm mt-2">
-                  Send the exact amount using your bank app, then confirm payment.
+                  Send the exact amount to the receiver bank details below.
                 </p>
 
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Info label="Bank Options" value="BPI / BDO / UnionBank / Maya Bank" />
-                  <Info label="Account Name" value="ASIRA GLOBAL REMIT LTD" />
+                  <Info label="Receiver Bank" value={payment.receiver_bank_name} />
+                  <Info label="Account Name" value={payment.receiver_account_name} />
+                  <Info label="Account Number" value={payment.receiver_account_number} />
+                  <Info label="Country" value={payment.receiver_country} />
+                  <Info label="Currency" value={payment.receiver_currency} />
+                  <Info label="Payout Rail" value={payment.payout_rail} />
                   <Info label="Payment Reference" value={payment.reference} />
-                  <Info label="Rail" value="InstaPay / PESONet" />
                 </div>
 
                 <input
@@ -243,7 +250,7 @@ export default function HostedPaymentPage() {
                 </h3>
 
                 <p className="text-white/50 text-sm mt-2">
-                  Enter card details for secure payment processing.
+                  Demo card form only. Card details are not saved.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
@@ -290,8 +297,13 @@ export default function HostedPaymentPage() {
                 </p>
 
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Info label="Beneficiary" value="ASIRA GLOBAL REMIT LTD" />
-                  <Info label="SWIFT/BIC" value="ASIRPHMMXXX" />
+                  <Info label="Beneficiary" value={payment.receiver_account_name} />
+                  <Info label="Receiver Bank" value={payment.receiver_bank_name} />
+                  <Info label="Account Number" value={payment.receiver_account_number} />
+                  <Info label="SWIFT/BIC" value={payment.swift_code} />
+                  <Info label="IBAN" value={payment.iban} />
+                  <Info label="Country" value={payment.receiver_country} />
+                  <Info label="Currency" value={payment.receiver_currency} />
                   <Info label="Payment Reference" value={payment.reference} />
                   <Info label="Transfer Type" value="International Wire Transfer" />
                 </div>

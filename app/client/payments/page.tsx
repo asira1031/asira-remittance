@@ -15,6 +15,15 @@ type PaymentLink = {
   status: string;
   payment_url: string;
   created_at: string;
+
+  receiver_bank_name: string;
+  receiver_account_name: string;
+  receiver_account_number: string;
+  receiver_country: string;
+  receiver_currency: string;
+  payout_rail: string;
+  swift_code: string;
+  iban: string;
 };
 
 export default function ClientPaymentsPage() {
@@ -27,6 +36,15 @@ export default function ClientPaymentsPage() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("PHP");
   const [description, setDescription] = useState("");
+
+  const [receiverBankName, setReceiverBankName] = useState("");
+  const [receiverAccountName, setReceiverAccountName] = useState("");
+  const [receiverAccountNumber, setReceiverAccountNumber] = useState("");
+  const [receiverCountry, setReceiverCountry] = useState("");
+  const [receiverCurrency, setReceiverCurrency] = useState("PHP");
+  const [payoutRail, setPayoutRail] = useState("BANK");
+  const [swiftCode, setSwiftCode] = useState("");
+  const [iban, setIban] = useState("");
 
   async function loadLinks() {
     setLoading(true);
@@ -47,19 +65,30 @@ export default function ClientPaymentsPage() {
     const reference = `ASIRA-PAY-${Date.now()}`;
     const paymentUrl = `${window.location.origin}/pay/${reference}`;
 
-    const { error } = await supabase.from("merchant_payment_links").insert([
-      {
-        reference,
-        merchant_name: merchantName,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        amount: Number(amount || 0),
-        currency,
-        description,
-        status: "ACTIVE",
-        payment_url: paymentUrl,
-      },
-    ]);
+    const { error } = await supabase
+      .from("merchant_payment_links")
+      .insert([
+        {
+          reference,
+          merchant_name: merchantName,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          amount: Number(amount || 0),
+          currency,
+          description,
+          status: "ACTIVE",
+          payment_url: paymentUrl,
+
+          receiver_bank_name: receiverBankName,
+          receiver_account_name: receiverAccountName,
+          receiver_account_number: receiverAccountNumber,
+          receiver_country: receiverCountry,
+          receiver_currency: receiverCurrency,
+          payout_rail: payoutRail,
+          swift_code: swiftCode,
+          iban,
+        },
+      ]);
 
     if (error) {
       alert(error.message);
@@ -72,6 +101,15 @@ export default function ClientPaymentsPage() {
     setAmount("");
     setCurrency("PHP");
     setDescription("");
+
+    setReceiverBankName("");
+    setReceiverAccountName("");
+    setReceiverAccountNumber("");
+    setReceiverCountry("");
+    setReceiverCurrency("PHP");
+    setPayoutRail("BANK");
+    setSwiftCode("");
+    setIban("");
 
     await loadLinks();
   }
@@ -98,11 +136,11 @@ export default function ClientPaymentsPage() {
     <main className="min-h-screen bg-black text-white px-8 py-10">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-black text-emerald-400">
-          Payment Links
+          Merchant Gateway
         </h1>
 
         <p className="text-white/50 mt-2">
-          Create hosted payment links for business customers using the Asira Gateway.
+          Create hosted payment links and define settlement destinations.
         </p>
 
         <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
@@ -115,37 +153,97 @@ export default function ClientPaymentsPage() {
             <Input label="Customer Name" value={customerName} setValue={setCustomerName} />
             <Input label="Customer Email" value={customerEmail} setValue={setCustomerEmail} />
             <Input label="Amount" value={amount} setValue={setAmount} />
+            <Input label="Description" value={description} setValue={setDescription} />
 
             <div>
               <label className="mb-2 block text-sm text-white/50">
                 Currency
               </label>
+
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
               >
-                <option value="PHP">PHP</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="SGD">SGD</option>
-                <option value="HKD">HKD</option>
-                <option value="JPY">JPY</option>
+                <option>PHP</option>
+                <option>USD</option>
+                <option>EUR</option>
+                <option>GBP</option>
+                <option>SGD</option>
+              </select>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-black mt-10 mb-5">
+            Settlement Destination
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Input
+              label="Receiver Bank Name"
+              value={receiverBankName}
+              setValue={setReceiverBankName}
+            />
+
+            <Input
+              label="Receiver Account Name"
+              value={receiverAccountName}
+              setValue={setReceiverAccountName}
+            />
+
+            <Input
+              label="Receiver Account Number"
+              value={receiverAccountNumber}
+              setValue={setReceiverAccountNumber}
+            />
+
+            <Input
+              label="Receiver Country"
+              value={receiverCountry}
+              setValue={setReceiverCountry}
+            />
+
+            <Input
+              label="Receiver Currency"
+              value={receiverCurrency}
+              setValue={setReceiverCurrency}
+            />
+
+            <div>
+              <label className="mb-2 block text-sm text-white/50">
+                Payout Rail
+              </label>
+
+              <select
+                value={payoutRail}
+                onChange={(e) => setPayoutRail(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+              >
+                <option value="BANK">BANK</option>
+                <option value="CARD">CARD</option>
+                <option value="SWIFT">SWIFT</option>
               </select>
             </div>
 
-            <Input label="Description" value={description} setValue={setDescription} />
+            <Input
+              label="SWIFT Code"
+              value={swiftCode}
+              setValue={setSwiftCode}
+            />
 
-            <div className="md:col-span-3">
-              <button
-                onClick={createPaymentLink}
-                className="w-full rounded-2xl bg-emerald-500 py-4 font-black text-black"
-              >
-                Create Payment Link
-              </button>
-            </div>
+            <Input
+              label="IBAN"
+              value={iban}
+              setValue={setIban}
+            />
           </div>
+
+          <button
+            onClick={createPaymentLink}
+            className="w-full mt-8 rounded-2xl bg-emerald-500 py-4 font-black text-black"
+          >
+            Create Payment Link
+          </button>
         </div>
 
         <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
@@ -171,7 +269,7 @@ export default function ClientPaymentsPage() {
                 key={link.id}
                 className="rounded-2xl border border-white/10 bg-black/40 p-5"
               >
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Info label="Reference" value={link.reference} />
                   <Info label="Merchant" value={link.merchant_name} />
                   <Info label="Customer" value={link.customer_name} />
@@ -179,8 +277,10 @@ export default function ClientPaymentsPage() {
                     label="Amount"
                     value={`${link.currency} ${Number(link.amount).toLocaleString()}`}
                   />
+                  <Info label="Receiver Bank" value={link.receiver_bank_name} />
+                  <Info label="Payout Rail" value={link.payout_rail} />
                   <Info label="Status" value={link.status} />
-                  <Info label="Created" value={new Date(link.created_at).toLocaleString()} />
+                  <Info label="SWIFT" value={link.swift_code} />
                 </div>
 
                 <div className="mt-5 rounded-xl border border-white/10 bg-black/50 p-4 text-sm text-white/60 break-all">
