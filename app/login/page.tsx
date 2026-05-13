@@ -11,21 +11,33 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   async function handleLogin() {
-console.log("SUPABASE URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 20));
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-  alert(error.message);
-  console.log(error);
-  return;
-}
+      alert(error.message);
+      console.log(error);
+      return;
+    }
 
-    router.push("/admin");
+    router.push("/admin/dashboard");
+  }
+
+  async function handleSignup() {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+      console.log(error);
+      return;
+    }
+
+    alert("Account created successfully! Please login.");
   }
 
   return (
@@ -42,6 +54,7 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0,
         <label className="block text-sm text-white/50 mb-2">
           Email
         </label>
+
         <input
           type="email"
           className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
@@ -52,6 +65,7 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0,
         <label className="block text-sm text-white/50 mb-2">
           Password
         </label>
+
         <input
           type="password"
           className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
@@ -64,6 +78,13 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0,
           className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4"
         >
           Login
+        </button>
+
+        <button
+          onClick={handleSignup}
+          className="w-full rounded-2xl border border-white/10 bg-white/5 text-white font-bold py-4 mt-4"
+        >
+          Create Account
         </button>
       </div>
     </main>

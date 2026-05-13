@@ -1,4 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { supabase } from "@/lib/supabase";
+
+import {
+  getUserRole,
+  isAdmin,
+} from "@/lib/authRole";
 
 const links = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -18,6 +29,61 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [authorized, setAuthorized] =
+    useState(false);
+
+  useEffect(() => {
+    async function checkAccess() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const role = await getUserRole(
+          user.id
+        );
+
+        if (!isAdmin(role)) {
+          router.push("/");
+          return;
+        }
+
+        setAuthorized(true);
+      } catch (error) {
+        console.log(error);
+        router.push("/");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAccess();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-white/50">
+          Checking admin access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex">
       <aside className="w-64 min-h-screen border-r border-white/10 bg-white/5 p-6 hidden md:block">
@@ -38,7 +104,9 @@ export default function AdminLayout({
         </nav>
       </aside>
 
-      <section className="flex-1">{children}</section>
+      <section className="flex-1">
+        {children}
+      </section>
     </div>
   );
 }
