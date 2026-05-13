@@ -6,10 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
-import {
-  getUserRole,
-  isAdmin,
-} from "@/lib/authRole";
+import { getUserRole, isAdmin } from "@/lib/authRole";
 
 const links = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -33,11 +30,8 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [authorized, setAuthorized] =
-    useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     async function checkAccess() {
@@ -51,19 +45,17 @@ export default function AdminLayout({
           return;
         }
 
-        const role = await getUserRole(
-          user.id
-        );
+        const role = await getUserRole(user.id);
 
         if (!isAdmin(role)) {
-          router.push("/");
+          router.push("/login");
           return;
         }
 
         setAuthorized(true);
       } catch (error) {
         console.log(error);
-        router.push("/");
+        router.push("/login");
       } finally {
         setLoading(false);
       }
@@ -106,9 +98,7 @@ export default function AdminLayout({
         </nav>
       </aside>
 
-      <section className="flex-1">
-        {children}
-      </section>
+      <section className="flex-1">{children}</section>
     </div>
   );
 }
