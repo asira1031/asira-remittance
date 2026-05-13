@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
-import { getUserRole, isAdmin } from "@/lib/authRole";
-
 const links = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/transfers", label: "Transfers" },
@@ -45,13 +43,6 @@ export default function AdminLayout({
           return;
         }
 
-        const role = await getUserRole(user.id);
-
-        if (!isAdmin(role)) {
-          router.push("/login");
-          return;
-        }
-
         setAuthorized(true);
       } catch (error) {
         console.log(error);
@@ -67,9 +58,7 @@ export default function AdminLayout({
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-white/50">
-          Checking admin access...
-        </p>
+        <p className="text-white/50">Checking admin access...</p>
       </div>
     );
   }
