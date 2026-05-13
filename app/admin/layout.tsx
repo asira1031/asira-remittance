@@ -15,6 +15,8 @@ const links = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/transfers", label: "Transfers" },
   { href: "/admin/payouts", label: "Payouts" },
+  { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/merchant", label: "Merchant" },
   { href: "/admin/swift", label: "SWIFT" },
   { href: "/admin/cards", label: "Cards" },
   { href: "/admin/bank", label: "Bank" },
