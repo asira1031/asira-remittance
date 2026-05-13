@@ -123,9 +123,10 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => updateField("settlement_method", e.target.value)}
                   className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none"
                 >
-                  <option>Bank</option>
-                  <option>SWIFT</option>
-                  <option>Crypto</option>
+                  <option>Card</option>
+<option>Bank</option>
+<option>SWIFT</option>
+<option>Crypto</option>
                 </select>
               </div>
 
