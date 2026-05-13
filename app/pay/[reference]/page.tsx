@@ -26,6 +26,7 @@ export default function HostedPaymentPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState("");
 
   async function loadPayment() {
     const { data, error } = await supabase
@@ -101,7 +102,7 @@ export default function HostedPaymentPage() {
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-8">
-      <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8">
+      <div className="w-full max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8">
         <div className="border-b border-white/10 pb-6">
           <h1 className="text-4xl font-black text-emerald-400">
             ASIRA CHECKOUT
@@ -144,88 +145,174 @@ export default function HostedPaymentPage() {
           </div>
         )}
 
-       {!isPaid && !isCancelled && (
-  <div className="mt-8 space-y-4">
-    <h2 className="text-2xl font-black">
-      Select Payment Method
-    </h2>
+        {!isPaid && !isCancelled && (
+          <div className="mt-8 space-y-6">
+            <h2 className="text-2xl font-black">
+              Select Payment Method
+            </h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
-        <h3 className="text-xl font-black text-emerald-400">
-          Bank Transfer
-        </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                onClick={() => setSelectedMethod("BANK")}
+                className={`rounded-2xl border p-5 text-left transition ${
+                  selectedMethod === "BANK"
+                    ? "border-emerald-400 bg-emerald-500/10"
+                    : "border-white/10 bg-black/40"
+                }`}
+              >
+                <h3 className="text-xl font-black text-emerald-400">
+                  Bank Transfer
+                </h3>
 
-        <p className="text-white/50 text-sm mt-2">
-          Local Philippine bank transfer via Instapay or Pesonet.
-        </p>
+                <p className="text-white/50 text-sm mt-2">
+                  Local Philippine bank transfer via InstaPay or PESONet.
+                </p>
+              </button>
 
-        <div className="mt-4 text-sm space-y-1 text-white/70">
-          <p>BPI</p>
-          <p>BDO</p>
-          <p>UnionBank</p>
-          <p>Maya Bank</p>
-        </div>
+              <button
+                onClick={() => setSelectedMethod("CARD")}
+                className={`rounded-2xl border p-5 text-left transition ${
+                  selectedMethod === "CARD"
+                    ? "border-blue-400 bg-blue-500/10"
+                    : "border-white/10 bg-black/40"
+                }`}
+              >
+                <h3 className="text-xl font-black text-blue-400">
+                  Card Payment
+                </h3>
 
-        <button
-          onClick={markAsPaid}
-          disabled={paying}
-          className="w-full mt-5 rounded-xl bg-emerald-500 py-3 font-black text-black"
-        >
-          Pay via Bank
-        </button>
-      </div>
+                <p className="text-white/50 text-sm mt-2">
+                  Visa / Mastercard secure checkout.
+                </p>
+              </button>
 
-      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
-        <h3 className="text-xl font-black text-blue-400">
-          Card Payment
-        </h3>
+              <button
+                onClick={() => setSelectedMethod("SWIFT")}
+                className={`rounded-2xl border p-5 text-left transition ${
+                  selectedMethod === "SWIFT"
+                    ? "border-yellow-300 bg-yellow-500/10"
+                    : "border-white/10 bg-black/40"
+                }`}
+              >
+                <h3 className="text-xl font-black text-yellow-300">
+                  SWIFT / International
+                </h3>
 
-        <p className="text-white/50 text-sm mt-2">
-          Visa / Mastercard secure gateway checkout.
-        </p>
+                <p className="text-white/50 text-sm mt-2">
+                  International wire transfer.
+                </p>
+              </button>
+            </div>
 
-        <div className="mt-4 text-sm space-y-1 text-white/70">
-          <p>Visa</p>
-          <p>Mastercard</p>
-          <p>Virtual Cards</p>
-        </div>
+            {selectedMethod === "BANK" && (
+              <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6">
+                <h3 className="text-2xl font-black text-emerald-400">
+                  Bank Transfer Instructions
+                </h3>
 
-        <button
-          onClick={markAsPaid}
-          disabled={paying}
-          className="w-full mt-5 rounded-xl bg-blue-500 py-3 font-black text-white"
-        >
-          Pay via Card
-        </button>
-      </div>
+                <p className="text-white/50 text-sm mt-2">
+                  Send the exact amount using your bank app, then confirm payment.
+                </p>
 
-      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
-        <h3 className="text-xl font-black text-yellow-300">
-          SWIFT / International
-        </h3>
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Info label="Bank Options" value="BPI / BDO / UnionBank / Maya Bank" />
+                  <Info label="Account Name" value="ASIRA GLOBAL REMIT LTD" />
+                  <Info label="Payment Reference" value={payment.reference} />
+                  <Info label="Rail" value="InstaPay / PESONet" />
+                </div>
 
-        <p className="text-white/50 text-sm mt-2">
-          International bank wire and SWIFT transfer.
-        </p>
+                <input
+                  placeholder="Enter bank transfer reference number"
+                  className="w-full mt-5 rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                />
 
-        <div className="mt-4 text-sm space-y-1 text-white/70">
-          <p>SWIFT</p>
-          <p>IBAN</p>
-          <p>Cross-border</p>
-        </div>
+                <button
+                  onClick={markAsPaid}
+                  disabled={paying}
+                  className="w-full mt-6 rounded-2xl bg-emerald-500 py-4 font-black text-black disabled:opacity-50"
+                >
+                  {paying ? "Processing..." : "Confirm Bank Payment"}
+                </button>
+              </div>
+            )}
 
-        <button
-          onClick={markAsPaid}
-          disabled={paying}
-          className="w-full mt-5 rounded-xl bg-yellow-400 py-3 font-black text-black"
-        >
-          Pay via SWIFT
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            {selectedMethod === "CARD" && (
+              <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-6">
+                <h3 className="text-2xl font-black text-blue-400">
+                  Card Checkout
+                </h3>
+
+                <p className="text-white/50 text-sm mt-2">
+                  Enter card details for secure payment processing.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                  <input
+                    placeholder="Cardholder Name"
+                    className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                  />
+
+                  <input
+                    placeholder="Card Number"
+                    className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                  />
+
+                  <input
+                    placeholder="Expiry MM/YY"
+                    className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                  />
+
+                  <input
+                    placeholder="CVV"
+                    type="password"
+                    className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                  />
+                </div>
+
+                <button
+                  onClick={markAsPaid}
+                  disabled={paying}
+                  className="w-full mt-6 rounded-2xl bg-blue-500 py-4 font-black text-white disabled:opacity-50"
+                >
+                  {paying ? "Processing..." : "Pay with Card"}
+                </button>
+              </div>
+            )}
+
+            {selectedMethod === "SWIFT" && (
+              <div className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-6">
+                <h3 className="text-2xl font-black text-yellow-300">
+                  SWIFT / International Wire
+                </h3>
+
+                <p className="text-white/50 text-sm mt-2">
+                  Use these details for international wire transfer.
+                </p>
+
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Info label="Beneficiary" value="ASIRA GLOBAL REMIT LTD" />
+                  <Info label="SWIFT/BIC" value="ASIRPHMMXXX" />
+                  <Info label="Payment Reference" value={payment.reference} />
+                  <Info label="Transfer Type" value="International Wire Transfer" />
+                </div>
+
+                <input
+                  placeholder="Enter SWIFT transaction reference"
+                  className="w-full mt-5 rounded-xl border border-white/10 bg-black/40 px-4 py-3 outline-none"
+                />
+
+                <button
+                  onClick={markAsPaid}
+                  disabled={paying}
+                  className="w-full mt-6 rounded-2xl bg-yellow-400 py-4 font-black text-black disabled:opacity-50"
+                >
+                  {paying ? "Processing..." : "Confirm SWIFT Transfer"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {message && (
           <p className="text-center text-white/70 mt-5">
             {message}
