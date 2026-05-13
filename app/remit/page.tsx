@@ -29,7 +29,7 @@ export default function RemitPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const fee = Number(amount || 0) * 0.02;
+  const fee = Number(amount || 0) * 0.005;
   const totalToPay = Number(amount || 0) + fee;
 
   useEffect(() => {
@@ -207,7 +207,7 @@ export default function RemitPage() {
           </p>
 
           <p className="text-white/50 text-sm mt-3">
-            Transfer Fee 2%: ${fee.toFixed(2)}
+            Transfer Fee 0.5%: ${fee.toFixed(2)}
           </p>
 
           <p className="text-white font-bold">
