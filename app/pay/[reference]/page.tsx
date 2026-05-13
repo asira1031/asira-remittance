@@ -144,16 +144,88 @@ export default function HostedPaymentPage() {
           </div>
         )}
 
-        {!isPaid && !isCancelled && (
-          <button
-            onClick={markAsPaid}
-            disabled={paying}
-            className="w-full mt-8 rounded-2xl bg-emerald-500 py-4 font-black text-black disabled:opacity-50"
-          >
-            {paying ? "Processing..." : "Pay Now"}
-          </button>
-        )}
+       {!isPaid && !isCancelled && (
+  <div className="mt-8 space-y-4">
+    <h2 className="text-2xl font-black">
+      Select Payment Method
+    </h2>
 
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+        <h3 className="text-xl font-black text-emerald-400">
+          Bank Transfer
+        </h3>
+
+        <p className="text-white/50 text-sm mt-2">
+          Local Philippine bank transfer via Instapay or Pesonet.
+        </p>
+
+        <div className="mt-4 text-sm space-y-1 text-white/70">
+          <p>BPI</p>
+          <p>BDO</p>
+          <p>UnionBank</p>
+          <p>Maya Bank</p>
+        </div>
+
+        <button
+          onClick={markAsPaid}
+          disabled={paying}
+          className="w-full mt-5 rounded-xl bg-emerald-500 py-3 font-black text-black"
+        >
+          Pay via Bank
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+        <h3 className="text-xl font-black text-blue-400">
+          Card Payment
+        </h3>
+
+        <p className="text-white/50 text-sm mt-2">
+          Visa / Mastercard secure gateway checkout.
+        </p>
+
+        <div className="mt-4 text-sm space-y-1 text-white/70">
+          <p>Visa</p>
+          <p>Mastercard</p>
+          <p>Virtual Cards</p>
+        </div>
+
+        <button
+          onClick={markAsPaid}
+          disabled={paying}
+          className="w-full mt-5 rounded-xl bg-blue-500 py-3 font-black text-white"
+        >
+          Pay via Card
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+        <h3 className="text-xl font-black text-yellow-300">
+          SWIFT / International
+        </h3>
+
+        <p className="text-white/50 text-sm mt-2">
+          International bank wire and SWIFT transfer.
+        </p>
+
+        <div className="mt-4 text-sm space-y-1 text-white/70">
+          <p>SWIFT</p>
+          <p>IBAN</p>
+          <p>Cross-border</p>
+        </div>
+
+        <button
+          onClick={markAsPaid}
+          disabled={paying}
+          className="w-full mt-5 rounded-xl bg-yellow-400 py-3 font-black text-black"
+        >
+          Pay via SWIFT
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         {message && (
           <p className="text-center text-white/70 mt-5">
             {message}
