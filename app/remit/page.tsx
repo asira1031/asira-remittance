@@ -12,10 +12,23 @@ export default function RemitPage() {
   const [amount, setAmount] = useState("");
   const [convertedAmount, setConvertedAmount] = useState(0);
   const [usdRate, setUsdRate] = useState(56);
+
   const [destinationCountry, setDestinationCountry] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("BANK");
+  const [receiveCurrency, setReceiveCurrency] = useState("PHP");
+
+  const [receiverBankName, setReceiverBankName] = useState("");
+  const [receiverAccountNumber, setReceiverAccountNumber] = useState("");
+  const [swiftCode, setSwiftCode] = useState("");
+
+  const [purposeOfTransfer, setPurposeOfTransfer] = useState("");
+  const [sourceOfFunds, setSourceOfFunds] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const fee = Number(amount || 0) * 0.02;
+  const totalToPay = Number(amount || 0) + fee;
 
   useEffect(() => {
     async function getRate() {
@@ -52,9 +65,17 @@ export default function RemitPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          senderName,
-          receiverName,
-          amount,
+          sender_name: senderName,
+          receiver_name: receiverName,
+          amount: Number(amount),
+          destination_country: destinationCountry,
+          payment_method: paymentMethod,
+          receive_currency: receiveCurrency,
+          receiver_bank_name: receiverBankName,
+          receiver_account_number: receiverAccountNumber,
+          swift_code: swiftCode,
+          purpose_of_transfer: purposeOfTransfer,
+          source_of_funds: sourceOfFunds,
         }),
       });
 
@@ -66,9 +87,9 @@ export default function RemitPage() {
         .from("payment_intents")
         .insert([
           {
-            transaction_id: crypto.randomUUID(),
+            transaction_id: Date.now(),
             reference: `ASIRA-${Date.now()}`,
-            amount: Number(amount),
+            amount: totalToPay,
             currency: "USD",
           },
         ])
@@ -86,13 +107,20 @@ export default function RemitPage() {
       setAmount("");
       setConvertedAmount(0);
       setDestinationCountry("");
+      setPaymentMethod("BANK");
+      setReceiveCurrency("PHP");
+      setReceiverBankName("");
+      setReceiverAccountNumber("");
+      setSwiftCode("");
+      setPurposeOfTransfer("");
+      setSourceOfFunds("");
 
       if (paymentData) {
         router.push(`/checkout/${paymentData.id}`);
       }
 
       if (result.success) {
-        setMessage("✅ Remittance Created Successfully");
+        setMessage("✅ International Remittance Created Successfully");
       } else {
         setMessage("❌ Failed");
       }
@@ -107,18 +135,17 @@ export default function RemitPage() {
   return (
     <main className="min-h-screen bg-black text-white px-8 py-10">
       <h1 className="text-4xl font-black text-emerald-400">
-        Start Transfer
+        International Transfer
       </h1>
 
       <p className="text-white/50 mt-2">
-        Create a new Asira Global Remit transaction.
+        Create a new Asira Global Remit international transaction.
       </p>
 
-      <div className="mt-10 max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8">
+      <div className="mt-10 max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8">
         <label className="block text-sm text-white/50 mb-2">
           Sender Name
         </label>
-
         <input
           value={senderName}
           onChange={(e) => setSenderName(e.target.value)}
@@ -128,7 +155,6 @@ export default function RemitPage() {
         <label className="block text-sm text-white/50 mb-2">
           Receiver Name
         </label>
-
         <input
           value={receiverName}
           onChange={(e) => setReceiverName(e.target.value)}
@@ -138,39 +164,123 @@ export default function RemitPage() {
         <label className="block text-sm text-white/50 mb-2">
           Amount USD
         </label>
-
         <input
           value={amount}
           onChange={(e) => handleAmountChange(e.target.value)}
           className="w-full mb-2 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
         />
 
-        <p className="text-emerald-400 text-sm">
-          Estimated PHP Payout: ₱
-          {convertedAmount.toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </p>
+        <div className="mb-5 rounded-2xl border border-white/10 bg-black/30 p-4">
+          <p className="text-emerald-400 text-sm">
+            Estimated PHP Payout: ₱
+            {convertedAmount.toLocaleString("en-PH", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
 
-        <p className="text-white/40 text-xs mb-5">
-          Live Rate: 1 USD = ₱{usdRate.toFixed(2)}
-        </p>
+          <p className="text-white/40 text-xs">
+            Live Rate: 1 USD = ₱{usdRate.toFixed(2)}
+          </p>
+
+          <p className="text-white/50 text-sm mt-3">
+            Transfer Fee 2%: ${fee.toFixed(2)}
+          </p>
+
+          <p className="text-white font-bold">
+            Total To Pay: ${totalToPay.toFixed(2)}
+          </p>
+        </div>
 
         <label className="block text-sm text-white/50 mb-2">
           Destination Country
         </label>
-
         <input
           value={destinationCountry}
           onChange={(e) => setDestinationCountry(e.target.value)}
-          className="w-full mb-6 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
         />
+
+        <label className="block text-sm text-white/50 mb-2">
+          Receive Currency
+        </label>
+        <select
+          value={receiveCurrency}
+          onChange={(e) => setReceiveCurrency(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        >
+          <option value="PHP">PHP - Philippine Peso</option>
+          <option value="USD">USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="HKD">HKD - Hong Kong Dollar</option>
+          <option value="SGD">SGD - Singapore Dollar</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+        </select>
+
+        <label className="block text-sm text-white/50 mb-2">
+          Receiver Bank Name
+        </label>
+        <input
+          value={receiverBankName}
+          onChange={(e) => setReceiverBankName(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        />
+
+        <label className="block text-sm text-white/50 mb-2">
+          Receiver Account Number / IBAN
+        </label>
+        <input
+          value={receiverAccountNumber}
+          onChange={(e) => setReceiverAccountNumber(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        />
+
+        <label className="block text-sm text-white/50 mb-2">
+          SWIFT / BIC Code
+        </label>
+        <input
+          value={swiftCode}
+          onChange={(e) => setSwiftCode(e.target.value.toUpperCase())}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        />
+
+        <label className="block text-sm text-white/50 mb-2">
+          Purpose of Transfer
+        </label>
+        <select
+          value={purposeOfTransfer}
+          onChange={(e) => setPurposeOfTransfer(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        >
+          <option value="">Select Purpose</option>
+          <option value="FAMILY_SUPPORT">Family Support</option>
+          <option value="SALARY">Salary</option>
+          <option value="BUSINESS_PAYMENT">Business Payment</option>
+          <option value="EDUCATION">Education</option>
+          <option value="MEDICAL">Medical</option>
+          <option value="OTHER">Other</option>
+        </select>
+
+        <label className="block text-sm text-white/50 mb-2">
+          Source of Funds
+        </label>
+        <select
+          value={sourceOfFunds}
+          onChange={(e) => setSourceOfFunds(e.target.value)}
+          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+        >
+          <option value="">Select Source</option>
+          <option value="SALARY">Salary</option>
+          <option value="BUSINESS_INCOME">Business Income</option>
+          <option value="SAVINGS">Savings</option>
+          <option value="INVESTMENT">Investment</option>
+          <option value="OTHER">Other</option>
+        </select>
 
         <label className="block text-sm text-white/50 mb-2">
           Payment Method
         </label>
-
         <select
           value={paymentMethod}
           onChange={(e) => setPaymentMethod(e.target.value)}
@@ -207,7 +317,7 @@ export default function RemitPage() {
           disabled={loading}
           className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
         >
-          {loading ? "Processing..." : "Create Transfer"}
+          {loading ? "Processing..." : "Create International Transfer"}
         </button>
 
         {message && (

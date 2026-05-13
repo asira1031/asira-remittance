@@ -3,25 +3,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Transfer = {
-  id: string;
-  sender_name: string;
-  receiver_name: string;
-  amount: number;
-  destination_country: string;
-  created_at: string;
-  status: string;
-};
-
 export default function AdminTransfersPage() {
-  const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [transfers, setTransfers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadTransfers();
-  }, []);
-
   async function loadTransfers() {
+    setLoading(true);
+
     const { data, error } = await supabase
       .from("transactions")
       .select("*")
@@ -34,7 +22,7 @@ export default function AdminTransfersPage() {
     setLoading(false);
   }
 
-  async function updateStatus(id: string, status: string) {
+  async function updateStatus(id: number, status: string) {
     await supabase
       .from("transactions")
       .update({ status })
@@ -43,176 +31,141 @@ export default function AdminTransfersPage() {
     loadTransfers();
   }
 
-  function statusColor(status: string) {
-    switch (status) {
-      case "COMPLETED":
-        return "text-emerald-400";
-
-      case "PROCESSING":
-        return "text-blue-400";
-
-      case "FAILED":
-        return "text-red-400";
-
-      case "REJECTED":
-        return "text-red-500";
-
-      case "APPROVED":
-        return "text-yellow-400";
-
-      default:
-        return "text-yellow-300";
-    }
-  }
+  useEffect(() => {
+    loadTransfers();
+  }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white px-8 py-10">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-black text-emerald-400">
-          Admin Transfers
-        </h1>
+    <main className="min-h-screen bg-black text-white p-8">
+      <h1 className="text-4xl font-black text-emerald-400">
+        International Transfers
+      </h1>
 
-        <p className="text-white/50 mt-2">
-          Live transfer monitoring and payout status management.
-        </p>
+      <p className="text-white/50 mt-2">
+        Monitor and manage all remittance transactions.
+      </p>
 
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <div className="flex justify-between mb-6">
-            <h2 className="text-2xl font-black">Transfer Queue</h2>
+      <div className="mt-8 overflow-x-auto rounded-3xl border border-white/10 bg-white/5">
+        <table className="w-full text-sm">
+          <thead className="bg-white/10 text-white/70">
+            <tr>
+              <th className="p-4 text-left">Reference</th>
+              <th className="p-4 text-left">Sender</th>
+              <th className="p-4 text-left">Receiver</th>
+              <th className="p-4 text-left">Amount</th>
+              <th className="p-4 text-left">Currency</th>
+              <th className="p-4 text-left">Country</th>
+              <th className="p-4 text-left">Bank</th>
+              <th className="p-4 text-left">SWIFT</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-left">Compliance</th>
+              <th className="p-4 text-left">Actions</th>
+            </tr>
+          </thead>
 
-            <span className="text-emerald-400 font-bold">
-              {transfers.length} Records
-            </span>
-          </div>
-
-          {loading ? (
-            <p className="text-white/40">Loading transfers...</p>
-          ) : (
-            <div className="space-y-4">
-              {transfers.map((transfer) => (
-                <div
-                  key={transfer.id}
-                  className="rounded-2xl border border-white/10 bg-black/40 p-5"
+          <tbody>
+            {loading && (
+              <tr>
+                <td
+                  colSpan={11}
+                  className="p-8 text-center text-white/40"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div>
-                      <p className="text-white/40 text-xs">Sender</p>
-                      <p className="font-bold">
-                        {transfer.sender_name}
-                      </p>
-                    </div>
+                  Loading transfers...
+                </td>
+              </tr>
+            )}
 
-                    <div>
-                      <p className="text-white/40 text-xs">Receiver</p>
-                      <p className="font-bold">
-                        {transfer.receiver_name}
-                      </p>
-                    </div>
+            {!loading && transfers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={11}
+                  className="p-8 text-center text-white/40"
+                >
+                  No transactions found.
+                </td>
+              </tr>
+            )}
 
-                    <div>
-                      <p className="text-white/40 text-xs">
-                        Destination
-                      </p>
+            {!loading &&
+              transfers.map((tx) => (
+                <tr
+                  key={tx.id}
+                  className="border-t border-white/10"
+                >
+                  <td className="p-4">
+                    ASIRA-{tx.id}
+                  </td>
 
-                      <p className="font-bold">
-                        {transfer.destination_country}
-                      </p>
-                    </div>
+                  <td className="p-4">
+                    {tx.sender_name}
+                  </td>
 
-                    <div>
-                      <p className="text-white/40 text-xs">Amount</p>
+                  <td className="p-4">
+                    {tx.receiver_name}
+                  </td>
 
-                      <p className="font-black text-emerald-400">
-                        $
-                        {Number(
-                          transfer.amount
-                        ).toLocaleString()}
-                      </p>
-                    </div>
+                  <td className="p-4">
+                    $
+                    {Number(tx.amount).toLocaleString()}
+                  </td>
 
-                    <div className="text-right">
-                      <p
-                        className={`font-black ${statusColor(
-                          transfer.status || "PENDING"
-                        )}`}
-                      >
-                        {transfer.status || "PENDING"}
-                      </p>
+                  <td className="p-4">
+                    {tx.receive_currency}
+                  </td>
 
-                      <p className="text-white/30 text-xs">
-                        {new Date(
-                          transfer.created_at
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
+                  <td className="p-4">
+                    {tx.destination_country}
+                  </td>
 
-                  <div className="flex flex-wrap gap-2 mt-5">
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          transfer.id,
-                          "PROCESSING"
-                        )
-                      }
-                      className="px-4 py-2 rounded-xl bg-blue-500 text-white font-bold"
+                  <td className="p-4">
+                    {tx.receiver_bank_name}
+                  </td>
+
+                  <td className="p-4">
+                    {tx.swift_code}
+                  </td>
+
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        tx.status === "APPROVED"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : tx.status === "REJECTED"
+                          ? "bg-red-500/20 text-red-400"
+                          : "bg-yellow-500/20 text-yellow-300"
+                      }`}
                     >
-                      Processing
-                    </button>
+                      {tx.status}
+                    </span>
+                  </td>
 
+                  <td className="p-4">
+                    {tx.compliance_status}
+                  </td>
+
+                  <td className="p-4 flex gap-2">
                     <button
                       onClick={() =>
-                        updateStatus(
-                          transfer.id,
-                          "APPROVED"
-                        )
+                        updateStatus(tx.id, "APPROVED")
                       }
-                      className="px-4 py-2 rounded-xl bg-yellow-500 text-black font-bold"
+                      className="px-3 py-2 rounded-xl bg-emerald-500 text-black text-xs font-bold"
                     >
                       Approve
                     </button>
 
                     <button
                       onClick={() =>
-                        updateStatus(
-                          transfer.id,
-                          "COMPLETED"
-                        )
+                        updateStatus(tx.id, "REJECTED")
                       }
-                      className="px-4 py-2 rounded-xl bg-emerald-500 text-black font-bold"
-                    >
-                      Complete
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          transfer.id,
-                          "FAILED"
-                        )
-                      }
-                      className="px-4 py-2 rounded-xl bg-red-500 text-white font-bold"
-                    >
-                      Fail
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          transfer.id,
-                          "REJECTED"
-                        )
-                      }
-                      className="px-4 py-2 rounded-xl bg-red-700 text-white font-bold"
+                      className="px-3 py-2 rounded-xl bg-red-500 text-white text-xs font-bold"
                     >
                       Reject
                     </button>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          )}
-        </div>
+          </tbody>
+        </table>
       </div>
     </main>
   );

@@ -1,29 +1,60 @@
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 import { remitConfig } from "@/lib/remitConfig";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    console.log("Production Mode:", remitConfig.mode);
+    const transactionData = {
+      sender_name: body.sender_name,
+      receiver_name: body.receiver_name,
+      amount: Number(body.amount),
+      destination_country: body.destination_country,
+      payment_method: body.payment_method,
+      receive_currency: body.receive_currency,
+      receiver_bank_name: body.receiver_bank_name,
+      receiver_account_number: body.receiver_account_number,
+      swift_code: body.swift_code,
+      purpose_of_transfer: body.purpose_of_transfer,
+      source_of_funds: body.source_of_funds,
 
-    const payload = {
-      senderName: body.senderName,
-      receiverName: body.receiverName,
-      amount: body.amount,
-      bankName: remitConfig.receivingBankName,
-      accountName: remitConfig.receivingAccountName,
-      accountNumber: remitConfig.receivingAccountNumber,
+      bank_name: remitConfig.receivingBankName,
+      account_name: remitConfig.receivingAccountName,
+      account_number: remitConfig.receivingAccountNumber,
       branch: remitConfig.receivingBranch,
-      paymentMode: remitConfig.paymentMode,
+      payment_mode: remitConfig.paymentMode,
+      environment: remitConfig.mode,
+
+      status: "PENDING",
+      compliance_status: "UNDER_REVIEW",
+      created_at: new Date().toISOString(),
     };
+
+    const { data, error } = await supabase
+      .from("transactions")
+      .insert([transactionData])
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       environment: remitConfig.mode,
-      data: payload,
+      transaction: data,
     });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       {
         success: false,
