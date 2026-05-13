@@ -30,3 +30,12 @@ button {
 button:hover {
   transform: translateY(-2px);
 }
+.input {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.4);
+  padding: 16px 20px;
+  outline: none;
+  color: white;
+}
