@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-
+import { createAuditLog } from "@/lib/audit";
 export default function AdminTransfersPage() {
   const [transfers, setTransfers] = useState<any[]>([]);
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
@@ -23,15 +23,31 @@ export default function AdminTransfersPage() {
     setLoading(false);
   }
 
-  async function updateStatus(id: number, status: string) {
-    await supabase.from("transactions").update({ status }).eq("id", id);
-    await loadTransfers();
+ async function updateStatus(id: number, status: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    if (selectedTx?.id === id) {
-      setSelectedTx({ ...selectedTx, status });
-    }
+  await supabase
+    .from("transactions")
+    .update({ status })
+    .eq("id", id);
+
+  await createAuditLog({
+    user_id: user?.id,
+    user_email: user?.email,
+    action: `TRANSFER_STATUS_UPDATED_TO_${status}`,
+    entity_type: "TRANSACTION",
+    entity_id: String(id),
+    details: `Transfer ASIRA-${id} status changed to ${status}`,
+  });
+
+  await loadTransfers();
+
+  if (selectedTx?.id === id) {
+    setSelectedTx({ ...selectedTx, status });
   }
-
+}
   useEffect(() => {
     loadTransfers();
   }, []);
