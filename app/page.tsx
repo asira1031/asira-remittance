@@ -80,7 +80,12 @@ export default function HomePage() {
             >
               Start Transfer
             </Link>
-
+<Link
+  href="/merchant-register"
+  className="inline-flex items-center justify-center rounded-2xl border border-emerald-500/40 px-8 py-4 font-bold text-emerald-400 hover:bg-emerald-500 hover:text-black transition"
+>
+  Register as Merchant
+</Link>
             <Link
               href="/admin/merchant"
               className="inline-flex items-center justify-center rounded-2xl border border-white/10 px-8 py-4 font-bold text-white hover:border-emerald-400 hover:text-emerald-400 transition"
