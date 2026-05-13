@@ -15,6 +15,8 @@ export default function RemitPage() {
 
   const [destinationCountry, setDestinationCountry] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("BANK");
+  const [transferType, setTransferType] =
+  useState("LOCAL");
   const [receiveCurrency, setReceiveCurrency] = useState("PHP");
 
   const [receiverBankName, setReceiverBankName] = useState("");
@@ -141,6 +143,27 @@ export default function RemitPage() {
       <p className="text-white/50 mt-2">
         Create a new Asira Global Remit international transaction.
       </p>
+      <div className="mt-6 mb-6">
+  <label className="block text-sm text-white/50 mb-2">
+    Transfer Type
+  </label>
+
+  <select
+    value={transferType}
+    onChange={(e) =>
+      setTransferType(e.target.value)
+    }
+    className="w-full max-w-sm rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+  >
+    <option value="LOCAL">
+      Local Transfer
+    </option>
+
+    <option value="INTERNATIONAL">
+      International Transfer
+    </option>
+  </select>
+</div>
 
       <div className="mt-10 max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8">
         <label className="block text-sm text-white/50 mb-2">
@@ -201,91 +224,146 @@ export default function RemitPage() {
           className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
         />
 
-        <label className="block text-sm text-white/50 mb-2">
-          Receive Currency
-        </label>
-        <select
-          value={receiveCurrency}
-          onChange={(e) => setReceiveCurrency(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        >
-          <option value="PHP">PHP - Philippine Peso</option>
-          <option value="USD">USD - US Dollar</option>
-          <option value="EUR">EUR - Euro</option>
-          <option value="GBP">GBP - British Pound</option>
-          <option value="HKD">HKD - Hong Kong Dollar</option>
-          <option value="SGD">SGD - Singapore Dollar</option>
-          <option value="JPY">JPY - Japanese Yen</option>
-        </select>
+      {transferType === "INTERNATIONAL" && (
+  <>
+    <label className="block text-sm text-white/50 mb-2">
+      Receive Currency
+    </label>
 
-        <label className="block text-sm text-white/50 mb-2">
-          Receiver Bank Name
-        </label>
-        <input
-          value={receiverBankName}
-          onChange={(e) => setReceiverBankName(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        />
+    <select
+      value={receiveCurrency}
+      onChange={(e) => setReceiveCurrency(e.target.value)}
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    >
+      <option value="PHP">PHP - Philippine Peso</option>
+      <option value="USD">USD - US Dollar</option>
+      <option value="EUR">EUR - Euro</option>
+      <option value="GBP">GBP - British Pound</option>
+      <option value="HKD">HKD - Hong Kong Dollar</option>
+      <option value="SGD">SGD - Singapore Dollar</option>
+      <option value="JPY">JPY - Japanese Yen</option>
+    </select>
 
-        <label className="block text-sm text-white/50 mb-2">
-          Receiver Account Number / IBAN
-        </label>
-        <input
-          value={receiverAccountNumber}
-          onChange={(e) => setReceiverAccountNumber(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        />
+    <label className="block text-sm text-white/50 mb-2">
+      Receiver Bank Name
+    </label>
 
-        <label className="block text-sm text-white/50 mb-2">
-          SWIFT / BIC Code
-        </label>
-        <input
-          value={swiftCode}
-          onChange={(e) => setSwiftCode(e.target.value.toUpperCase())}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        />
+    <input
+      value={receiverBankName}
+      onChange={(e) => setReceiverBankName(e.target.value)}
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    />
 
-        <label className="block text-sm text-white/50 mb-2">
-          Purpose of Transfer
-        </label>
-        <select
-          value={purposeOfTransfer}
-          onChange={(e) => setPurposeOfTransfer(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        >
-          <option value="">Select Purpose</option>
-          <option value="FAMILY_SUPPORT">Family Support</option>
-          <option value="SALARY">Salary</option>
-          <option value="BUSINESS_PAYMENT">Business Payment</option>
-          <option value="EDUCATION">Education</option>
-          <option value="MEDICAL">Medical</option>
-          <option value="OTHER">Other</option>
-        </select>
+    <label className="block text-sm text-white/50 mb-2">
+      Receiver Account Number / IBAN
+    </label>
 
-        <label className="block text-sm text-white/50 mb-2">
-          Source of Funds
-        </label>
-        <select
-          value={sourceOfFunds}
-          onChange={(e) => setSourceOfFunds(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        >
-          <option value="">Select Source</option>
-          <option value="SALARY">Salary</option>
-          <option value="BUSINESS_INCOME">Business Income</option>
-          <option value="SAVINGS">Savings</option>
-          <option value="INVESTMENT">Investment</option>
-          <option value="OTHER">Other</option>
-        </select>
+    <input
+      value={receiverAccountNumber}
+      onChange={(e) =>
+        setReceiverAccountNumber(e.target.value)
+      }
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    />
 
-        <label className="block text-sm text-white/50 mb-2">
-          Payment Method
-        </label>
-        <select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-          className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
-        >
+    <label className="block text-sm text-white/50 mb-2">
+      SWIFT / BIC Code
+    </label>
+
+    <input
+      value={swiftCode}
+      onChange={(e) =>
+        setSwiftCode(
+          e.target.value.toUpperCase()
+        )
+      }
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    />
+
+    <label className="block text-sm text-white/50 mb-2">
+      Purpose of Transfer
+    </label>
+
+    <select
+      value={purposeOfTransfer}
+      onChange={(e) =>
+        setPurposeOfTransfer(e.target.value)
+      }
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    >
+      <option value="">Select Purpose</option>
+
+      <option value="FAMILY_SUPPORT">
+        Family Support
+      </option>
+
+      <option value="SALARY">
+        Salary
+      </option>
+
+      <option value="BUSINESS_PAYMENT">
+        Business Payment
+      </option>
+
+      <option value="EDUCATION">
+        Education
+      </option>
+
+      <option value="MEDICAL">
+        Medical
+      </option>
+
+      <option value="OTHER">
+        Other
+      </option>
+    </select>
+
+    <label className="block text-sm text-white/50 mb-2">
+      Source of Funds
+    </label>
+
+    <select
+      value={sourceOfFunds}
+      onChange={(e) =>
+        setSourceOfFunds(e.target.value)
+      }
+      className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+    >
+      <option value="">Select Source</option>
+
+      <option value="SALARY">
+        Salary
+      </option>
+
+      <option value="BUSINESS_INCOME">
+        Business Income
+      </option>
+
+      <option value="SAVINGS">
+        Savings
+      </option>
+
+      <option value="INVESTMENT">
+        Investment
+      </option>
+
+      <option value="OTHER">
+        Other
+      </option>
+    </select>
+  </>
+)}
+
+<label className="block text-sm text-white/50 mb-2">
+  Payment Method
+</label>
+
+<select
+  value={paymentMethod}
+  onChange={(e) => setPaymentMethod(e.target.value)}
+  className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
+>
+        
           <option value="BANK">Bank Transfer</option>
           <option value="CARD">Card Payment</option>
           <option value="SWIFT">SWIFT Transfer</option>
