@@ -4,30 +4,30 @@ export async function GET(req: NextRequest) {
   const code = new URL(req.url).searchParams.get("code");
 
   if (!code) {
-    return NextResponse.json({ error: "Missing code" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing code" },
+      { status: 400 }
+    );
   }
 
   const clientId = process.env.UNIONBANK_CLIENT_ID;
-
-  if (!clientId) {
-    return NextResponse.json(
-      { error: "Missing UNIONBANK_CLIENT_ID" },
-      { status: 500 }
-    );
-  }
+  const clientSecret = process.env.UNIONBANK_CLIENT_SECRET;
 
   const response = await fetch(
     "https://api-uat.unionbankph.com/partners/sb/convergent/v1/oauth2/token",
     {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
+        "x-ibm-client-id": clientId!,
+        "x-ibm-client-secret": clientSecret!,
       },
       body: new URLSearchParams({
         grant_type: "authorization_code",
-        client_id: clientId,
         code,
         redirect_uri: "https://localhost:3000/callback",
+        client_id: clientId!,
       }),
     }
   );
