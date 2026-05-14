@@ -4,7 +4,7 @@ export async function GET() {
   const clientId = process.env.UNIONBANK_CLIENT_ID;
 
   const redirectUri =
-    "https://asira-remittance.vercel.app/api/unionbank/callback";
+  "https://api-uat.unionbankph.com/ubp/uat/v1/redirect";
 
   const state = `ASIRA-${Date.now()}`;
 
