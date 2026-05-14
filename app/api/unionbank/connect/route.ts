@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
+export async function GET() {
+  const clientId = process.env.UNIONBANK_CLIENT_ID;
 
-  return NextResponse.json({
-    ok: true,
-    message: "UnionBank callback route working",
-    code,
-    state,
-  });
+  const redirectUri =
+    "https://asira-remittance.vercel.app/api/unionbank/callback";
+
+  const state = `ASIRA-${Date.now()}`;
+
+  const url =
+    "https://api-uat.unionbankph.com/partners/sb/customers/v1/oauth2/authorize" +
+    `?response_type=code` +
+    `&client_id=${encodeURIComponent(clientId || "")}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&scope=${encodeURIComponent("account_info")}` +
+    `&state=${encodeURIComponent(state)}`;
+
+  return NextResponse.redirect(url);
 }
