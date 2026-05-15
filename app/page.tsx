@@ -87,11 +87,11 @@ export default function HomePage() {
   Register as Merchant
 </Link>
             <Link
-              href="/admin/merchant"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/10 px-8 py-4 font-bold text-white hover:border-emerald-400 hover:text-emerald-400 transition"
-            >
-              Merchant Portal
-            </Link>
+  href="/merchant-login"
+  className="inline-flex items-center justify-center rounded-2xl border border-white/10 px-8 py-4 font-bold text-white hover:border-emerald-400 hover:text-emerald-400 transition"
+>
+  Merchant Portal
+</Link>
           </div>
         </div>
 
