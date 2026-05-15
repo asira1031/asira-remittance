@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+export async function GET() {
+  const access_token = process.env.UNIONBANK_ACCESS_TOKEN;
+  const refresh_token = process.env.UNIONBANK_REFRESH_TOKEN;
 
-    const { access_token, refresh_token } = body;
+  const { data, error } = await supabase
+    .from("bank_connections")
+    .insert([
+      {
+        provider: "UNIONBANK",
+        access_token,
+        refresh_token,
+      },
+    ])
+    .select();
 
-    const { data, error } = await supabase
-      .from("bank_connections")
-      .insert([
-        {
-          provider: "UNIONBANK",
-          access_token,
-          refresh_token,
-        },
-      ])
-      .select();
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
+  if (error) {
     return NextResponse.json({
-      success: true,
-      data,
+      success: false,
+      error: error.message,
     });
-  } catch (err) {
-    return NextResponse.json(
-      { success: false, error: "Server error" },
-      { status: 500 }
-    );
   }
+
+  return NextResponse.json({
+    success: true,
+    data,
+  });
 }

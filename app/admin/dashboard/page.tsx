@@ -19,6 +19,8 @@ type Transfer = {
 
 export default function AdminDashboardPage() {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [bankConnected, setBankConnected] = useState(false);
+const [bankProvider, setBankProvider] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +35,13 @@ export default function AdminDashboardPage() {
       }
 
       setLoading(false);
+      const bankRes = await fetch("/api/bank/status");
+const bankData = await bankRes.json();
+
+if (bankData.connected) {
+  setBankConnected(true);
+  setBankProvider(bankData.provider);
+}
     }
 
     loadMetrics();
@@ -104,33 +113,27 @@ export default function AdminDashboardPage() {
             </h2>
           </div>
         </div>
+        <div className="mt-6 rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white/50">
+                Bank Connection
+              </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10">
-          <MetricCard
-            label="Total Volume"
-            value={loading ? "..." : `$${totalVolume.toLocaleString()}`}
-            color="text-emerald-400"
-          />
+              <h2 className="text-3xl font-black text-emerald-400 mt-2">
+                {bankConnected ? "CONNECTED" : "DISCONNECTED"}
+              </h2>
 
-          <MetricCard
-            label="Total Transfers"
-            value={loading ? "..." : totalTransfers}
-            color="text-blue-400"
-          />
+              <p className="text-white/50 mt-2">
+                Provider: {bankProvider || "N/A"}
+              </p>
+            </div>
 
-          <MetricCard
-            label="Transfers Today"
-            value={loading ? "..." : transfersToday}
-            color="text-yellow-300"
-          />
-
-          <MetricCard
-            label="Estimated Fees 0.5%"
-            value={loading ? "..." : `$${totalFees.toLocaleString()}`}
-            color="text-purple-300"
-          />
+            <div className="text-5xl">
+              🏦
+            </div>
+          </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-5">
           <MetricCard
             label="Pending Operations"
