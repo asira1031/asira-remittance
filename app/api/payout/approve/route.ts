@@ -33,6 +33,18 @@ export async function POST(req: Request) {
 
     // SAFE SIMULATION MODE muna.
     // Later dito natin ilalagay real UnionBank transfer API call.
+    const unionbankPayload = {
+  senderRefId: `ASIRA-${transaction_id}`,
+  tranRequestDate: new Date().toISOString().split("T")[0],
+  accountNo: "DESTINATION_ACCOUNT",
+  amount: {
+    currency: "PHP",
+    value: Number(transaction.amount || 100),
+  },
+  remarks: "Asira payout",
+};
+
+console.log("UnionBank Payload:", unionbankPayload);
 
     await supabase
       .from("transactions")
