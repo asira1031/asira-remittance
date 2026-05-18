@@ -10,37 +10,43 @@ export async function GET() {
       return NextResponse.json({
         ok: false,
         message: "Missing Netbank environment variables",
+        hasClientId: !!clientId,
+        hasClientSecret: !!clientSecret,
+        baseUrl,
       });
     }
 
-    const auth = Buffer.from(
-      `${clientId}:${clientSecret}`
-    ).toString("base64");
+    const tokenUrl = `${baseUrl}/oauth2/token`;
 
-    const response = await fetch(
-      `${baseUrl}/oauth2/token`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          grant_type: "client_credentials",
-        }),
-      }
-    );
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
-    const data = await response.json();
+    const response = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+      }),
+    });
+
+    const text = await response.text();
 
     return NextResponse.json({
-      ok: true,
-      token: data,
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      tokenUrl,
+      responseText: text,
     });
   } catch (error: any) {
     return NextResponse.json({
       ok: false,
-      error: error.message,
+      errorName: error?.name,
+      errorMessage: error?.message,
+      errorCause: error?.cause,
     });
   }
 }
