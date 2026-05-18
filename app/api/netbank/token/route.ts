@@ -16,7 +16,7 @@ export async function GET() {
       });
     }
 
-    const tokenUrl = `${baseUrl}/oauth2/token`;
+    const tokenUrl = `${process.env.NETBANK_AUTH_URL}/oauth2/token`;
 
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
