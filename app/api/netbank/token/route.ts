@@ -5,20 +5,24 @@ export async function GET() {
     const clientId = process.env.NETBANK_CLIENT_ID;
     const clientSecret = process.env.NETBANK_CLIENT_SECRET;
     const baseUrl = process.env.NETBANK_BASE_URL;
+    const authUrl = process.env.NETBANK_AUTH_URL;
 
-    if (!clientId || !clientSecret || !baseUrl) {
+    if (!clientId || !clientSecret || !baseUrl || !authUrl) {
       return NextResponse.json({
         ok: false,
         message: "Missing Netbank environment variables",
         hasClientId: !!clientId,
         hasClientSecret: !!clientSecret,
-        baseUrl,
+        hasBaseUrl: !!baseUrl,
+        hasAuthUrl: !!authUrl,
       });
     }
 
-    const tokenUrl = `${process.env.NETBANK_AUTH_URL}/oauth2/token`;
+    const tokenUrl = `${authUrl}/oauth2/token`;
 
-    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+    const auth = Buffer.from(
+      `${clientId}:${clientSecret}`
+    ).toString("base64");
 
     const response = await fetch(tokenUrl, {
       method: "POST",

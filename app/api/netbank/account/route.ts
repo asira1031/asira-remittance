@@ -8,13 +8,19 @@ export async function GET() {
 
     const tokenData = await tokenRes.json();
 
-    const accessToken =
-      tokenData?.token?.access_token;
+    let parsedToken: any = tokenData?.token;
+
+    if (!parsedToken && tokenData?.responseText) {
+      parsedToken = JSON.parse(tokenData.responseText);
+    }
+
+    const accessToken = parsedToken?.access_token;
 
     if (!accessToken) {
       return NextResponse.json({
         ok: false,
         message: "No access token",
+        tokenData,
       });
     }
 
@@ -23,20 +29,26 @@ export async function GET() {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
         },
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
 
     return NextResponse.json({
-      ok: true,
-      data,
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      accountUrl: `${process.env.NETBANK_BASE_URL}/accounts`,
+      responseText: text,
     });
   } catch (error: any) {
     return NextResponse.json({
       ok: false,
-      error: error.message,
+      errorName: error?.name,
+      errorMessage: error?.message,
+      errorCause: error?.cause,
     });
   }
 }
