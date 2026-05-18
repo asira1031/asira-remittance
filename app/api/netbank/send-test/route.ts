@@ -20,32 +20,26 @@ export async function GET() {
       return NextResponse.json({
         ok: false,
         message: "No access token",
-        tokenData,
       });
     }
 
-    const payload = {
-      dryRun: true,
-      amount: "1.00",
-      currency: "PHP",
-      reference: `ASIRA-TEST-${Date.now()}`,
-      sender: {
-        name: "Asira Global Remit Test",
-      },
-      receiver: {
-        bank: "TEST BANK",
-        accountName: "TEST RECEIVER",
-        accountNumber: "0000000000",
-      },
-      note: "Dry run only. No real money should be sent.",
-    };
+    const response = await fetch(
+      `https://api.netbank.ph/v1/collect/financial_institutions`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const text = await response.text();
 
     return NextResponse.json({
-      ok: true,
-      mode: "DRY_RUN_ONLY",
-      message: "Token works. Test payload prepared. No transfer sent.",
-      tokenType: parsedToken?.token_type,
-      payload,
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      responseText: text,
     });
   } catch (error: any) {
     return NextResponse.json({
