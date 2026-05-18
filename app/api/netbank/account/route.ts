@@ -25,7 +25,7 @@ export async function GET() {
     }
 
     const response = await fetch(
-      `${process.env.NETBANK_BASE_URL}/accounts`,
+      `${process.env.NETBANK_BASE_URL}/api/accounts`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
