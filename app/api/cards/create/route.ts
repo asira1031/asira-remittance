@@ -1,91 +1,34 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-
-function detectCardType(cardNumber: string) {
-  if (cardNumber.startsWith("4")) {
-    return "VISA";
-  }
-
-  if (cardNumber.startsWith("5")) {
-    return "MASTERCARD";
-  }
-
-  return "CARD";
-}
-
-function maskCard(cardNumber: string) {
-  const digits = cardNumber.replace(/\D/g, "");
-
-  const first = digits.slice(0, 1);
-  const last4 = digits.slice(-4);
-
-  return `${first}*** **** **** ${last4}`;
-}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const reference = `CARD-${Date.now()}`;
+    const amount = Number(body.amount || 0);
+    const reference = body.reference || `ASIRA-CARD-${Date.now()}`;
 
-    const maskedCard = maskCard(
-      body.card_number || ""
-    );
-
-    const cardType = detectCardType(
-      body.card_number || ""
-    );
-
-    const { data, error } = await supabase
-      .from("card_payments")
-      .insert([
-        {
-          reference,
-
-          cardholder_name:
-            body.cardholder_name,
-
-          masked_card: maskedCard,
-
-          card_type: cardType,
-
-          country: body.country,
-
-          amount: Number(body.amount || 0),
-
-          currency:
-            body.currency || "USD",
-
-          linked_transfer:
-            body.linked_transfer || "",
-
-          status: "PROCESSING",
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
+    if (!amount || amount <= 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: error.message,
-        },
-        { status: 500 }
+        { success: false, error: "Invalid amount" },
+        { status: 400 }
       );
     }
 
+    // DEMO hosted checkout URL muna
+    // Later papalitan natin ito ng Maya/PayMongo real checkout URL
+    const checkoutUrl = `/checkout/card?reference=${reference}&amount=${amount}`;
+
     return NextResponse.json({
       success: true,
-      card_payment: data,
+      provider: "ASIRA_DEMO_CARD",
+      reference,
+      checkoutUrl,
     });
   } catch (error) {
+    console.log("Create card payment error:", error);
+
     return NextResponse.json(
-      {
-        success: false,
-        error:
-          "Failed to create card payment",
-      },
+      { success: false, error: "Server error" },
       { status: 500 }
     );
   }
