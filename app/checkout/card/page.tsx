@@ -1,81 +1,144 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 
-export default function CardCheckoutPage() {
+function CardCheckoutContent() {
   const searchParams = useSearchParams();
 
-  const reference = searchParams.get("reference") || "ASIRA-CARD";
   const amount = searchParams.get("amount") || "0";
-
-  const [status, setStatus] = useState("");
-
-  function handlePay() {
-    setStatus("✅ Demo card payment approved. Transaction is ready for confirmation.");
-  }
+  const reference = searchParams.get("reference") || "ASIRA-DEMO";
+  const merchant = searchParams.get("merchant") || "Merchant Account";
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8">
-        <h1 className="text-2xl font-bold">Asira Card Checkout</h1>
+    <main style={page}>
+      <div style={card}>
+        <h1 style={title}>Card Payment</h1>
+        <p style={subtitle}>Secure merchant card checkout</p>
 
-        <p className="mt-2 text-white/50 text-sm">
-          Demo hosted card payment page
-        </p>
-
-        <div className="mt-6 space-y-4">
-          <div>
-            <label className="text-sm text-white/50">Reference</label>
-            <input
-              value={reference}
-              readOnly
-              className="mt-1 w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-white/50">Amount</label>
-            <input
-              value={`PHP ${Number(amount).toLocaleString()}`}
-              readOnly
-              className="mt-1 w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-white/50">Card Number</label>
-            <input
-              placeholder="4242 4242 4242 4242"
-              className="mt-1 w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              placeholder="MM/YY"
-              className="rounded-xl bg-black/40 border border-white/10 px-4 py-3"
-            />
-            <input
-              placeholder="CVV"
-              className="rounded-xl bg-black/40 border border-white/10 px-4 py-3"
-            />
-          </div>
-
-          <button
-            onClick={handlePay}
-            className="w-full rounded-xl bg-white text-black font-semibold py-3"
-          >
-            Pay Now
-          </button>
-
-          {status && (
-            <p className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-green-300 text-sm">
-              {status}
-            </p>
-          )}
+        <div style={summary}>
+          <Row label="Merchant" value={merchant} />
+          <Row label="Reference" value={reference} />
+          <Row label="Amount" value={`PHP ${amount}`} />
         </div>
+
+        <label style={label}>Cardholder Name</label>
+        <input style={input} placeholder="Juan Dela Cruz" />
+
+        <label style={label}>Card Number</label>
+        <input style={input} placeholder="4242 4242 4242 4242" />
+
+        <div style={grid}>
+          <div>
+            <label style={label}>Expiry</label>
+            <input style={input} placeholder="MM/YY" />
+          </div>
+
+          <div>
+            <label style={label}>CVV</label>
+            <input style={input} placeholder="123" />
+          </div>
+        </div>
+
+        <button style={button}>Pay Now</button>
       </div>
     </main>
   );
 }
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={row}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+export default function CardCheckoutPage() {
+  return (
+    <Suspense fallback={<div style={page}>Loading checkout...</div>}>
+      <CardCheckoutContent />
+    </Suspense>
+  );
+}
+
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "#050505",
+  color: "white",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 24,
+};
+
+const card: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 520,
+  background: "#111",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 24,
+  padding: 32,
+};
+
+const title: React.CSSProperties = {
+  fontSize: 30,
+  fontWeight: 800,
+  marginBottom: 8,
+};
+
+const subtitle: React.CSSProperties = {
+  color: "rgba(255,255,255,0.6)",
+  marginBottom: 24,
+};
+
+const summary: React.CSSProperties = {
+  background: "rgba(255,255,255,0.06)",
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 24,
+};
+
+const row: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 16,
+  marginBottom: 10,
+  color: "rgba(255,255,255,0.8)",
+};
+
+const label: React.CSSProperties = {
+  display: "block",
+  fontSize: 14,
+  marginBottom: 8,
+  color: "rgba(255,255,255,0.7)",
+};
+
+const input: React.CSSProperties = {
+  width: "100%",
+  padding: "14px 16px",
+  marginBottom: 18,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "#050505",
+  color: "white",
+  outline: "none",
+};
+
+const grid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 16,
+};
+
+const button: React.CSSProperties = {
+  width: "100%",
+  padding: "15px 18px",
+  borderRadius: 14,
+  border: "none",
+  background: "white",
+  color: "black",
+  fontWeight: 800,
+  cursor: "pointer",
+};
