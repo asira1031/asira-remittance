@@ -1,56 +1,34 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  try {
-    const clientId = process.env.NETBANK_CLIENT_ID;
-    const clientSecret = process.env.NETBANK_CLIENT_SECRET;
-    const baseUrl = process.env.NETBANK_BASE_URL;
-    const authUrl = process.env.NETBANK_AUTH_URL;
+  const clientId = process.env.UNIONBANK_CLIENT_ID;
+  const redirectUri = process.env.UNIONBANK_REDIRECT_URI;
 
-    if (!clientId || !clientSecret || !baseUrl || !authUrl) {
-      return NextResponse.json({
-        ok: false,
-        message: "Missing Netbank environment variables",
-        hasClientId: !!clientId,
-        hasClientSecret: !!clientSecret,
-        hasBaseUrl: !!baseUrl,
-        hasAuthUrl: !!authUrl,
-      });
-    }
-
-    const tokenUrl = `${authUrl}/oauth2/token`;
-
-    const auth = Buffer.from(
-      `${clientId}:${clientSecret}`
-    ).toString("base64");
-
-    const response = await fetch(tokenUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/json",
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-      }),
-    });
-
-    const text = await response.text();
-
-    return NextResponse.json({
-      ok: response.ok,
-      status: response.status,
-      statusText: response.statusText,
-      tokenUrl,
-      responseText: text,
-    });
-  } catch (error: any) {
+  if (!clientId || !redirectUri) {
     return NextResponse.json({
       ok: false,
-      errorName: error?.name,
-      errorMessage: error?.message,
-      errorCause: error?.cause,
+      message: "Missing UnionBank env",
+      hasClientId: !!clientId,
+      redirectUri,
     });
   }
+
+  const state = `ASIRA-${Date.now()}`;
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "code",
+    redirect_uri: redirectUri,
+    state,
+  });
+
+  const authUrl =
+    `https://api-uat.unionbankph.com/partners/sb/customers/v1/oauth2/authorize?${params.toString()}`;
+
+  return NextResponse.json({
+    ok: true,
+    authUrl,
+    redirectUri,
+    clientId,
+  });
 }
