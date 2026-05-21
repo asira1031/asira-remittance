@@ -15,13 +15,15 @@ export async function GET() {
 
   const state = `ASIRA-${Date.now()}`;
 
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "code",
+    redirect_uri: redirectUri,
+    state,
+  });
+
   const authUrl =
-    `https://api-uat.unionbankph.com/partners/sb/customers/v1/oauth2/authorize` +
-    `?response_type=code` +
-    `&client_id=${encodeURIComponent(clientId)}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&scope=${encodeURIComponent("account_info")}` +
-    `&state=${encodeURIComponent(state)}`;
+    `https://api-uat.unionbankph.com/partners/sb/customers/v1/oauth2/authorize?${params.toString()}`;
 
   return NextResponse.redirect(authUrl);
 }
