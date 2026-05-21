@@ -2,19 +2,26 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const clientId = process.env.UNIONBANK_CLIENT_ID;
+  const redirectUri = process.env.UNIONBANK_REDIRECT_URI;
 
-  const redirectUri =
-    "https://api-uat.unionbankph.com/ubp/uat/v1/redirect";
+  if (!clientId || !redirectUri) {
+    return NextResponse.json({
+      ok: false,
+      message: "Missing UnionBank env",
+      hasClientId: !!clientId,
+      redirectUri,
+    });
+  }
 
   const state = `ASIRA-${Date.now()}`;
 
-  const url =
-    "https://api-uat.unionbankph.com/partners/sb/convergent/v1/oauth2/authorize" +
+  const authUrl =
+    `https://api-uat.unionbankph.com/partners/sb/customers/v1/oauth2/authorize` +
     `?response_type=code` +
-    `&client_id=${encodeURIComponent(clientId || "")}` +
+    `&client_id=${encodeURIComponent(clientId)}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&scope=${encodeURIComponent("payments")}` +
+    `&scope=${encodeURIComponent("account_info")}` +
     `&state=${encodeURIComponent(state)}`;
 
-  return NextResponse.redirect(url);
+  return NextResponse.redirect(authUrl);
 }
