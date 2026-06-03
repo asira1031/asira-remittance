@@ -15,9 +15,11 @@ export default function AdminSettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-10">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
             <p className="text-white/50 text-sm">Environment</p>
-            <h2 className="text-2xl font-black text-yellow-400 mt-2">
-              SANDBOX
-            </h2>
+           <h2 className="text-2xl font-black text-yellow-400 mt-2">
+ Banking Environment
+Current API mode for UnionBank and financial rails
+UAT
+</h2>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
