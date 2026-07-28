@@ -21,7 +21,7 @@ export default function MerchantDashboardPage() {
     {
       reference: "ASIRA-24001",
       client: "Juan Dela Cruz",
-      method: "Card",
+      method: "QR Ph",
       amount: "$1,200",
       status: "PENDING",
     },
@@ -35,16 +35,20 @@ export default function MerchantDashboardPage() {
   ]);
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem("merchant_email");
-    const storedName = localStorage.getItem("merchant_name");
+    const timer = window.setTimeout(() => {
+      const storedEmail = localStorage.getItem("merchant_email");
+      const storedName = localStorage.getItem("merchant_name");
 
-    if (!storedEmail) {
-      router.push("/merchant-login");
-      return;
-    }
+      if (!storedEmail) {
+        router.push("/merchant-login");
+        return;
+      }
 
-    setMerchantEmail(storedEmail);
-    setMerchantName(storedName || "Merchant");
+      setMerchantEmail(storedEmail);
+      setMerchantName(storedName || "Merchant");
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [router]);
 
   function logout() {
@@ -60,7 +64,8 @@ export default function MerchantDashboardPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-5xl font-black text-emerald-400">
+            <p className="eyebrow">Merchant workspace</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
               Merchant Dashboard
             </h1>
 
@@ -91,7 +96,7 @@ export default function MerchantDashboardPage() {
 
         {/* QUICK ACTIONS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div className="glass-panel rounded-3xl p-8">
             <h2 className="text-3xl font-black">
               Quick Actions
             </h2>
@@ -119,37 +124,37 @@ export default function MerchantDashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div className="glass-panel rounded-3xl p-8">
             <h2 className="text-3xl font-black">
               Supported Payments
             </h2>
 
             <div className="grid grid-cols-2 gap-4 mt-8">
               <MethodCard
-                title="Card"
-                description="Visa / Mastercard"
+                title="QR Ph"
+                description="Dynamic scan-to-pay · Sandbox"
               />
 
               <MethodCard
-                title="Bank"
-                description="Local bank transfer"
+                title="Tap to Pay"
+                description="NFC contactless · Sandbox"
               />
 
               <MethodCard
-                title="SWIFT"
-                description="International settlement"
+                title="SoftPOS"
+                description="Phone as terminal · Sandbox"
               />
 
               <MethodCard
-                title="Crypto"
-                description="USDT / blockchain payments"
+                title="Global rails"
+                description="Card, bank, SWIFT & USDT"
               />
             </div>
           </div>
         </div>
 
         {/* TRANSACTIONS */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 mt-10">
+        <div className="glass-panel rounded-3xl p-8 mt-10">
           <h2 className="text-3xl font-black">
             Recent Transactions
           </h2>
@@ -212,12 +217,12 @@ function Card({
   value: string;
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div className="premium-card rounded-3xl p-6">
       <p className="text-white/40 text-sm">
         {title}
       </p>
 
-      <h3 className="text-4xl font-black text-emerald-400 mt-3">
+      <h3 className="text-4xl font-semibold tracking-[-0.04em] text-[#62e6a7] mt-3">
         {value}
       </h3>
     </div>
@@ -232,8 +237,8 @@ function ActionCard({
   description: string;
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-      <h3 className="text-xl font-black text-emerald-400">
+    <div className="premium-card rounded-2xl p-6 hover:border-[#62e6a7]/25">
+      <h3 className="text-xl font-semibold text-[#8ef0c1]">
         {title}
       </h3>
 
@@ -252,8 +257,8 @@ function MethodCard({
   description: string;
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-      <h3 className="text-2xl font-black text-emerald-400">
+    <div className="premium-card rounded-2xl p-6">
+      <h3 className="text-xl font-semibold text-[#8ef0c1]">
         {title}
       </h3>
 

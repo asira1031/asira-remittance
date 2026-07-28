@@ -135,13 +135,16 @@ export default function RemitPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-8 py-10">
-      <h1 className="text-4xl font-black text-emerald-400">
-        International Transfer
+    <main className="app-shell min-h-screen px-5 py-8 text-white sm:px-8 sm:py-12">
+      <div className="mx-auto max-w-5xl">
+      <p className="eyebrow">Secure global transfer</p>
+      <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+        Send money, simply.
       </h1>
 
-      <p className="text-white/50 mt-2">
-        Create a new Asira Global Remit international transaction.
+      <p className="mt-3 max-w-2xl leading-7 text-white/45">
+        Enter the transfer details and review the exact payment request before
+        anything is submitted.
       </p>
       <div className="mt-6 mb-6">
   <label className="block text-sm text-white/50 mb-2">
@@ -165,7 +168,7 @@ export default function RemitPage() {
   </select>
 </div>
 
-      <div className="mt-10 max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8">
+      <div className="glass-panel mt-8 max-w-3xl rounded-[2rem] p-6 sm:p-8">
         <label className="block text-sm text-white/50 mb-2">
           Sender Name
         </label>
@@ -363,13 +366,36 @@ export default function RemitPage() {
   onChange={(e) => setPaymentMethod(e.target.value)}
   className="w-full mb-5 rounded-xl bg-black/40 border border-white/10 px-4 py-3 outline-none"
 >
-        
+          <option value="QRPH">QR Ph</option>
+          <option value="NFC">NFC / Tap to Pay</option>
+          <option value="SOFTPOS">SoftPOS</option>
           <option value="BANK">Bank Transfer</option>
           <option value="CARD">Card Payment</option>
           <option value="SWIFT">SWIFT Transfer</option>
         </select>
 
         <div className="mb-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+          {paymentMethod === "QRPH" && (
+            <p className="text-emerald-300 text-sm">
+              QR Ph sandbox selected. A secure scan-to-pay request will be
+              prepared at checkout.
+            </p>
+          )}
+
+          {paymentMethod === "NFC" && (
+            <p className="text-emerald-300 text-sm">
+              Tap to Pay sandbox selected. A certified provider and compatible
+              device are required for live contactless acceptance.
+            </p>
+          )}
+
+          {paymentMethod === "SOFTPOS" && (
+            <p className="text-emerald-300 text-sm">
+              SoftPOS sandbox selected. Live payments require a supported
+              merchant Android device and acquiring provider.
+            </p>
+          )}
+
           {paymentMethod === "BANK" && (
             <p className="text-emerald-400 text-sm">
               Bank payout routing selected.
@@ -393,7 +419,7 @@ export default function RemitPage() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full rounded-2xl bg-emerald-500 text-black font-bold py-4 disabled:opacity-50"
+          className="w-full rounded-xl bg-[#62e6a7] py-4 font-bold text-[#07100d] shadow-[0_10px_35px_rgba(98,230,167,0.12)] hover:bg-[#79edb6] disabled:opacity-50"
         >
           {loading ? "Processing..." : "Create International Transfer"}
         </button>
@@ -403,6 +429,7 @@ export default function RemitPage() {
             {message}
           </p>
         )}
+      </div>
       </div>
     </main>
   );

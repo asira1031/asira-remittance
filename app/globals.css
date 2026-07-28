@@ -1,41 +1,148 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050816;
-  --foreground: #ffffff;
+  --background: #07100d;
+  --surface: #0b1713;
+  --foreground: #f4f7f5;
+  --muted: #94a39c;
+  --emerald: #62e6a7;
+  --emerald-deep: #103f30;
+  --gold: #d7bb78;
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
+  min-height: 100vh;
+  margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(16,185,129,0.15), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(0,255,200,0.08), transparent 30%),
-    #050816;
-
+    radial-gradient(circle at 12% 0%, rgba(48, 164, 116, 0.13), transparent 31rem),
+    radial-gradient(circle at 92% 22%, rgba(215, 187, 120, 0.07), transparent 28rem),
+    linear-gradient(180deg, #07100d 0%, #08120f 55%, #060d0b 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-button {
-  transition: all 0.2s ease;
+::selection {
+  background: rgba(98, 230, 167, 0.3);
+  color: #fff;
 }
 
-button:hover {
-  transform: translateY(-2px);
+button,
+a,
+input,
+select {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
+
+button:not(:disabled):active,
+a:active {
+  transform: translateY(1px);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.glass-panel {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.premium-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 20, 16, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--emerald);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--emerald);
+  box-shadow: 0 0 16px rgba(98, 230, 167, 0.75);
+  content: "";
+}
+
 .input {
   width: 100%;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.4);
-  padding: 16px 20px;
-  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(2, 8, 6, 0.62);
+  padding: 0.95rem 1rem;
   color: white;
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.input:focus {
+  border-color: rgba(98, 230, 167, 0.62);
+  box-shadow: 0 0 0 3px rgba(98, 230, 167, 0.09);
+}
+
+select.input,
+select[class*="bg-black"] {
+  color-scheme: dark;
+}
+
+.noise {
+  position: relative;
+  isolation: isolate;
+}
+
+.noise::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+  content: "";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

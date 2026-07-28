@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -42,7 +42,7 @@ export default function HostedPaymentPage() {
   const [message, setMessage] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
 
-  async function loadPayment() {
+  const loadPayment = useCallback(async () => {
     const { data, error } = await supabase
       .from("merchant_payment_links")
       .select("*")
@@ -54,7 +54,7 @@ export default function HostedPaymentPage() {
     }
 
     setLoading(false);
-  }
+  }, [reference]);
 
   async function markAsPaid(method: string) {
     if (!payment) return;
@@ -88,9 +88,10 @@ export default function HostedPaymentPage() {
 
   useEffect(() => {
     if (reference) {
-      loadPayment();
+      const timer = window.setTimeout(() => void loadPayment(), 0);
+      return () => window.clearTimeout(timer);
     }
-  }, [reference]);
+  }, [reference, loadPayment]);
 
   if (loading) {
     return (
@@ -170,7 +171,31 @@ export default function HostedPaymentPage() {
               Select Payment Method
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <MethodButton
+                title="QR Ph"
+                desc="Scan-to-pay · Sandbox"
+                color="emerald"
+                active={selectedMethod === "QRPH"}
+                onClick={() => setSelectedMethod("QRPH")}
+              />
+
+              <MethodButton
+                title="Tap to Pay"
+                desc="NFC contactless · Sandbox"
+                color="blue"
+                active={selectedMethod === "NFC"}
+                onClick={() => setSelectedMethod("NFC")}
+              />
+
+              <MethodButton
+                title="SoftPOS"
+                desc="Merchant device · Sandbox"
+                color="purple"
+                active={selectedMethod === "SOFTPOS"}
+                onClick={() => setSelectedMethod("SOFTPOS")}
+              />
+
               {payment.allow_bank !== false && (
                 <MethodButton
                   title="Bank"
@@ -211,6 +236,33 @@ export default function HostedPaymentPage() {
                 />
               )}
             </div>
+
+            {selectedMethod === "QRPH" && (
+              <SandboxMethod
+                icon="▦"
+                title="Scan with QR Ph"
+                description="A live dynamic QR will appear here after a QR Ph provider is connected. No payment will be marked paid in sandbox."
+                reference={payment.reference}
+              />
+            )}
+
+            {selectedMethod === "NFC" && (
+              <SandboxMethod
+                icon=")))"
+                title="Tap card or phone"
+                description="Live NFC acceptance requires a certified provider and a compatible contactless device."
+                reference={payment.reference}
+              />
+            )}
+
+            {selectedMethod === "SOFTPOS" && (
+              <SandboxMethod
+                icon="◇"
+                title="Ready for merchant tap"
+                description="Live SoftPOS acceptance requires a supported merchant Android device and acquiring provider."
+                reference={payment.reference}
+              />
+            )}
 
             {selectedMethod === "BANK" && (
               <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6">
@@ -371,7 +423,7 @@ export default function HostedPaymentPage() {
   );
 }
 
-function Info({ label, value }: { label: string; value: any }) {
+function Info({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
       <p className="text-xs text-white/40">{label}</p>
@@ -432,5 +484,37 @@ function MethodButton({
       </h3>
       <p className="text-white/50 text-sm mt-2">{desc}</p>
     </button>
+  );
+}
+
+function SandboxMethod({
+  icon,
+  title,
+  description,
+  reference,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  reference: string;
+}) {
+  return (
+    <div className="glass-panel rounded-3xl p-7 text-center">
+      <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#62e6a7]/25 bg-[#62e6a7]/10 font-mono text-2xl text-[#62e6a7]">
+        {icon}
+      </span>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <h3 className="text-2xl font-semibold">{title}</h3>
+        <span className="rounded-full border border-[#d7bb78]/20 bg-[#d7bb78]/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#d7bb78]">
+          Sandbox
+        </span>
+      </div>
+      <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-white/45">
+        {description}
+      </p>
+      <p className="mt-5 break-all font-mono text-xs text-[#62e6a7]">
+        {reference}
+      </p>
+    </div>
   );
 }
