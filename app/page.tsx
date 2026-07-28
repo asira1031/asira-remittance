@@ -49,7 +49,7 @@ export default function HomePage() {
               href="/admin/login"
               className="rounded-full border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-white/65 hover:border-white/20 hover:text-white"
             >
-              Admin
+              Admin Login
             </Link>
             <Link
               href="/remit"
