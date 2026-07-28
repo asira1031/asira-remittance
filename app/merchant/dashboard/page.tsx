@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type HostedPayment = {
   reference: string;
@@ -105,6 +106,7 @@ export default function MerchantDashboardPage() {
               <ActionCard
                 title="Create Hosted Link"
                 description="Generate new payment links."
+                href="/merchant/payments"
               />
 
               <ActionCard
@@ -232,12 +234,14 @@ function Card({
 function ActionCard({
   title,
   description,
+  href,
 }: {
   title: string;
   description: string;
+  href?: string;
 }) {
-  return (
-    <div className="premium-card rounded-2xl p-6 hover:border-[#62e6a7]/25">
+  const content = (
+    <>
       <h3 className="text-xl font-semibold text-[#8ef0c1]">
         {title}
       </h3>
@@ -245,6 +249,16 @@ function ActionCard({
       <p className="mt-3 text-white/50">
         {description}
       </p>
+    </>
+  );
+
+  return href ? (
+    <Link href={href} className="premium-card block rounded-2xl p-6 hover:border-[#62e6a7]/25">
+      {content}
+    </Link>
+  ) : (
+    <div className="premium-card rounded-2xl p-6 hover:border-[#62e6a7]/25">
+      {content}
     </div>
   );
 }
