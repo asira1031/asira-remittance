@@ -15,6 +15,7 @@ const links = [
   { href: "/admin/merchants", label: "Merchants" },
   { href: "/admin/swift", label: "SWIFT" },
   { href: "/admin/cards", label: "Cards" },
+  { href: "/admin/network-traffic", label: "Network Traffic" },
   { href: "/admin/bank", label: "Bank" },
   { href: "/admin/compliance", label: "Compliance" },
   { href: "/admin/users", label: "Users" },
